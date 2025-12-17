@@ -8,11 +8,11 @@ const navigation = () => {
       subject: 'accatee'
     },
     {
-      title: 'User Management',
-      path: '/user-management',
+      title: 'All Function Reports',
+      path: '/admin-function-reports',
       icon: 'ri:calendar-todo-fill',
       action: 'read',
-      subject: 'usermanage'
+      subject: 'functionreports'
     },
      {
       title: 'Assign Tasks',
@@ -27,6 +27,13 @@ const navigation = () => {
       icon: 'emojione-monotone:party-popper',
       action: 'read',
       subject: 'assignedFunction'
+    },
+        {
+      title: 'User Management',
+      path: '/user-management',
+      icon: 'ri:calendar-todo-fill',
+      action: 'read',
+      subject: 'usermanage'
     },
     {
       title: 'Manage Functions',

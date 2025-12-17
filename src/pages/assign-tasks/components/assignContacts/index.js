@@ -242,7 +242,7 @@ const generateColumns = ({ onToggle, onToggleColumn }) => {
         size: pagination?.pageSize
       }
         const response = await apiGet(
-          `${assignFunctionContactList}?functionId=${RowData?.id}&oid=&page=1&limit=10`
+          `${assignFunctionContactList}?functionId=${RowData?.id}&oid=&page=${params.page}&limit=${params.size}&search=${searchText}`
         )
         console.log('Push Notification Templates:', response.data)
         setContactsCount(response?.data?.pagination?.total || 0)

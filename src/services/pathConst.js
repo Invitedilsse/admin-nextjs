@@ -17,6 +17,13 @@ export const assignCallersBulkByFunctionId= `${baseURL}assign-task/assign-caller
 export const assignedCallersList= `${baseURL}assign-task/function-assigned-caller-list`
 export const assignedcallhistoryList= `${baseURL}assign-task/callhistory`
 export const assignedcallhistoryExcelList= `${baseURL}assign-task/callhistory-excel`
+export const reportUserList = `${baseURL}function-reports/user-list`
+export const reportFunctionListByUser = `${baseURL}function-reports/function-list`
+export const reportFunctionDetailsById = `${baseURL}function-reports/function-detail`
+export const reportEventDetailsById = `${baseURL}function-reports/event-detail`
+
+
+
 
 
 
