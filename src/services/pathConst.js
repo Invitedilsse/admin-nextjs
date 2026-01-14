@@ -174,4 +174,8 @@ export const updateCustomMappedUserAdmin = `${baseURL}push-notification-admin/up
 
 export const mapListUrl = `${baseURL}map-management/list-map`
 export const deletemapListUrl = `${baseURL}map-management/delete-map`
+export const eventListUrl = `${baseURL}map-management/list-event`
+export const deleteEventListUrl = `${baseURL}map-management/delete-event`
+
+
 

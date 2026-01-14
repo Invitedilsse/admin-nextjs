@@ -20,6 +20,7 @@ import {
 
 import { makeStyles } from '@mui/styles'
 import ListMap from './Components/listusers'
+import ListEvent from './Components/listevents'
 
 const useStyles = makeStyles({
   root: {}
@@ -98,16 +99,21 @@ const AdminPanel = props => {
                 aria-label='scrollable auto tabs example'
               >
                 <Tab label='Add Map' value={1} />
+                <Tab label='Add Event' value={2} />
               </Tabs>
             </Box>
 
             <TabPanel value={1}>
               <Fragment>
-                {/* <Events getAll={getAll} id={id} RowData={RowData} /> */}
-                {/* test 1 */}
                 <ListMap />
               </Fragment>
             </TabPanel>
+              <TabPanel value={2}>
+              <Fragment>
+                <ListEvent />
+              </Fragment>
+            </TabPanel>
+            
           </TabContext>
         </Box>
       </Card>
