@@ -36,6 +36,13 @@ const navigation = () => {
       subject: 'usermanage'
     },
     {
+      title: 'Map Management',
+      path: '/map-management',
+      icon: 'ri:calendar-todo-fill',
+      action: 'read',
+      subject: 'mapmanage'
+    },
+    {
       title: 'Manage Functions',
       path: '/function',
       icon: 'emojione-monotone:party-popper',

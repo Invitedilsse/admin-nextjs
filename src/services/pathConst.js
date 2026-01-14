@@ -171,3 +171,7 @@ export const gestCustomPushAdminAllUsersFun = `${baseURL}push-notification-admin
 export const deleteCustomPushTemplatesFunUsers = `${baseURL}push-notification-admin/delete-custom-templates-function`
 export const updateCustomMappedUserBulkSelectedAdmin = `${baseURL}push-notification-admin/update-custom-mapping/bulk-selected`
 export const updateCustomMappedUserAdmin = `${baseURL}push-notification-admin/update-custom-mapping`
+
+export const mapListUrl = `${baseURL}map-management/list-map`
+export const deletemapListUrl = `${baseURL}map-management/delete-map`
+
