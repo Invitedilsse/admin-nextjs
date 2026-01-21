@@ -41,6 +41,7 @@ const validationSchema = Yup.object({
 /* ---------------- CONSTANTS ---------------- */
 
 const key = process.env.KEY
+// const key = 'AIzaSyACXZr3essALZdpBLj-Mhdxl1X3o0s84Ys'
 const libraries = ['places']
 const groupTypes = ['transport', 'event', 'accommodation']
 

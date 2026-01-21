@@ -21,6 +21,7 @@ import {
 import { makeStyles } from '@mui/styles'
 import ListMap from './Components/listusers'
 import ListEvent from './Components/listevents'
+import ListOccasion from './Components/listoccasion'
 
 const useStyles = makeStyles({
   root: {}
@@ -98,8 +99,9 @@ const AdminPanel = props => {
                 scrollButtons='auto'
                 aria-label='scrollable auto tabs example'
               >
-                <Tab label='Add Map' value={1} />
-                <Tab label='Add Event' value={2} />
+                <Tab label='Add Offline Map' value={1} />
+                <Tab label='Add Offline Event' value={2} />
+                <Tab label='Add Offline Occasion' value={3} />
               </Tabs>
             </Box>
 
@@ -113,6 +115,13 @@ const AdminPanel = props => {
                 <ListEvent />
               </Fragment>
             </TabPanel>
+
+             <TabPanel value={3}>
+              <Fragment>
+                <ListOccasion />
+              </Fragment>
+            </TabPanel>
+            
             
           </TabContext>
         </Box>

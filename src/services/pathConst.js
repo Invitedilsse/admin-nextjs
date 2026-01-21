@@ -177,5 +177,6 @@ export const deletemapListUrl = `${baseURL}map-management/delete-map`
 export const eventListUrl = `${baseURL}map-management/list-event`
 export const deleteEventListUrl = `${baseURL}map-management/delete-event`
 
-
+export const occasionListUrl = `${baseURL}map-management/list-occasion`
+export const deleteOccasionListUrl = `${baseURL}map-management/delete-occasion`
 
