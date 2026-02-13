@@ -92,6 +92,11 @@ function ListMap({ page }) {
       Cell: ({ row }) =>   row.original.location_title // Event/Trans/Acc/Other title
     },
     {
+      accessorKey: 'venuname',
+      header: 'Venu Name',
+      Cell: ({ row }) =>   row.original.venuname||'-' // Event/Trans/Acc/Other title
+    },
+    {
       accessorKey: 'group_type',
       header: 'Group Type',
       Cell: ({ row }) => row.original.group_type || '-' // Event/Trans/Acc/Other title

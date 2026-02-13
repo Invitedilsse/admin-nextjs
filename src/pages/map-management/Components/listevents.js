@@ -31,6 +31,7 @@ import {
   eventListUrl,
   getnotification,
   mapTemplatesHrs,
+  occasionListUrl,
 } from 'src/services/pathConst'
 import toast from 'react-hot-toast'
 import { useSelector } from 'react-redux'
@@ -58,6 +59,7 @@ function ListEvent({ page }) {
   const [groupDropDrown, setgroupDropDrown] = useState([])
 
   console.log("userData.role------->",userData.role)
+  const[occasionList,setOccasionList] = useState([])
 
 
 
@@ -191,6 +193,20 @@ function ListEvent({ page }) {
     }
   }
 
+    const fetchOccasionData = async () => {
+      //fetch data from the api and set it to the state
+      try {
+        const response = await apiGet(
+          `${occasionListUrl}?search=&page=1&limit=200`
+        )
+        console.log('Push Notification Templates:', response.data)
+        setOccasionList(response.data.data.data || [])
+
+      } catch (error) {
+        console.error('Error fetching push notification templates:', error)
+      }
+    }
+
   const handleClose = () => {
     setdOpen(false)
     setdelId('')
@@ -198,6 +214,7 @@ function ListEvent({ page }) {
 
   useEffect(() => {
     fetchData()
+    fetchOccasionData()
   }, [])
 
   return (
@@ -234,6 +251,7 @@ function ListEvent({ page }) {
         RowData={selectedRow}
         fetchTable={fetchData}
         page={page}      
+        occasionList={occasionList}
         /> 
 
       <Dialog

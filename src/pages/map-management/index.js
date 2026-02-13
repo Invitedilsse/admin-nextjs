@@ -100,8 +100,9 @@ const AdminPanel = props => {
                 aria-label='scrollable auto tabs example'
               >
                 <Tab label='Add Offline Map' value={1} />
-                <Tab label='Add Offline Event' value={2} />
-                <Tab label='Add Offline Occasion' value={3} />
+                <Tab label='Add Offline Occasion' value={2} />
+
+                <Tab label='Add Offline Event' value={3} />
               </Tabs>
             </Box>
 
@@ -110,13 +111,13 @@ const AdminPanel = props => {
                 <ListMap />
               </Fragment>
             </TabPanel>
-              <TabPanel value={2}>
+              <TabPanel value={3}>
               <Fragment>
                 <ListEvent />
               </Fragment>
             </TabPanel>
 
-             <TabPanel value={3}>
+             <TabPanel value={2}>
               <Fragment>
                 <ListOccasion />
               </Fragment>

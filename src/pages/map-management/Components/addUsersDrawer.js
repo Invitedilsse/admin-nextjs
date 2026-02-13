@@ -28,6 +28,7 @@ import * as yup from 'yup'
 
 const validationSchema = Yup.object({
   location_title: Yup.string().required('Location name is required'),
+  venuname: Yup.string().required('Venue name is required'),
   group_type: Yup.string().required('Group type is required'),
   lat: Yup.string().required('Latitude is required'),
   long: Yup.string().required('Longitude is required'),
@@ -62,6 +63,7 @@ const AddMapTemplateDrawer = ({ open, toggle, RowData, fetchTable,dropValue,setD
 
   const initialValues = {
     location_title: RowData?.location_title || '',
+    venuname: RowData?.venuname||'',
     group_type: RowData?.group_type || '',
     lat: RowData?.lat || '',
     long: RowData?.long || '',
@@ -73,6 +75,7 @@ const AddMapTemplateDrawer = ({ open, toggle, RowData, fetchTable,dropValue,setD
       const payload = {
         ...(RowData?.id && { id: RowData.id }),
         location_title: values.location_title,
+        venuname: values.venuname,
         group_type: values.group_type,
         lat: values.lat,
         long: values.long,
@@ -174,7 +177,17 @@ const AddMapTemplateDrawer = ({ open, toggle, RowData, fetchTable,dropValue,setD
 
               </Autocomplete>
 
-         
+                    
+                    <TextField
+                    fullWidth
+                    name="venuname"
+                    label="Venue Name *"
+                    value={values.venuname}          
+                    onChange={handleChange}               
+                    error={touched.venuname && Boolean(errors.venuname)}
+                    helperText={touched.venuname && errors.venuname}
+                    sx={{ mb: 2 }}
+                  />
               {/* <InputLabel>Group Type *</InputLabel>
               <Select
                 fullWidth

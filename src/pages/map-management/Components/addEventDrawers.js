@@ -28,10 +28,11 @@ import * as yup from 'yup'
 
 const validationSchema = Yup.object({
   event_name: Yup.string().required('Event name is required'),
+    occasion_name:  Yup.string().required('Occasion name is required'),
 })
 
 
-const AddEventTemplateDrawer = ({ open, toggle, RowData, fetchTable }) => {
+const AddEventTemplateDrawer = ({ open, toggle, RowData, fetchTable,occasionList }) => {
   // alert('in')
 
 
@@ -48,6 +49,7 @@ const AddEventTemplateDrawer = ({ open, toggle, RowData, fetchTable }) => {
       const payload = {
         ...(RowData?.id && { id: RowData.id }),
         event_name: values.event_name,
+        occasion_name:values.occasion_name
       }
 
       console.log('payload---->',payload)
@@ -102,17 +104,43 @@ const AddEventTemplateDrawer = ({ open, toggle, RowData, fetchTable }) => {
         >
           {({ values, errors, touched, handleChange, setFieldValue, isSubmitting }) => (
             <Form>
+             
+                <TextField
+                  select
+                  fullWidth
+                  name="occasion_name"
+                  label="Occasion *"
+                  value={values.occasion_name}
+                  onChange={(e) => {
+                    setFieldValue('occasion_name', e.target.value);
+                    setFieldValue('event_name', ''); // optional: reset event name
+                  }}
+                  error={touched.occasion_name && Boolean(errors.occasion_name)}
+                  helperText={touched.occasion_name && errors.occasion_name}
+                  sx={{ mb: 2 }}
+                >
+                  {occasionList.map((occ) => (
+                    <MenuItem key={occ.id} value={occ.occasion_name}>
+                      {occ.occasion_name}
+                    </MenuItem>
+                  ))}
+                </TextField>
 
-                    <TextField
-                    fullWidth
-                    name="event_name"
-                    label="Event Name *"
-                    value={values.event_name}          
-                    onChange={handleChange}               
-                    error={touched.event_name && Boolean(errors.event_name)}
-                    helperText={touched.event_name && errors.event_name}
-                    sx={{ mb: 2 }}
-                  />
+                        <TextField
+                          fullWidth
+                          name="event_name"
+                          label="Event Name *"
+                          value={values.event_name}
+                          onChange={handleChange}
+                          disabled={!values.occasion_name}
+                          error={touched.event_name && Boolean(errors.event_name)}
+                          helperText={
+                            !values.occasion_name
+                              ? 'Please select an occasion first'
+                              : touched.event_name && errors.event_name
+                          }
+                          sx={{ mb: 2 }}
+                        />
 
 
               <Box sx={{ display: 'flex', gap: 2 }}>
