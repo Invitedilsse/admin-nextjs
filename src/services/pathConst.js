@@ -21,7 +21,7 @@ export const reportUserList = `${baseURL}function-reports/user-list`
 export const reportFunctionListByUser = `${baseURL}function-reports/function-list`
 export const reportFunctionDetailsById = `${baseURL}function-reports/function-detail`
 export const reportEventDetailsById = `${baseURL}function-reports/event-detail`
-
+export const reportOffFunInfoID = `${baseURL}function-reports/offline-event-detail`
 
 
 

@@ -127,12 +127,14 @@ const [addUserOpen, setAddUserOpen] = useState(false)
       accessorKey: 'Action',
       header: 'View In Detail',
       Cell: ({ row }) => (
+        
         <>
              {/* <Edit onClick={() => onTemplateClick(row.original)}/> */}
+             {console.log("row.original====----",row.original)}
               <Visibility
-                              onClick={() => onTemplateClick(row.original)}
-                              style={{ cursor: "pointer", marginRight: 8 }}
-                            />
+              onClick={() => onTemplateClick(row.original)}
+              style={{ cursor: "pointer", marginRight: 8 }}
+              />
         </>
       )
     }
@@ -312,7 +314,7 @@ const [addUserOpen, setAddUserOpen] = useState(false)
             <CardContent></CardContent>
             <Grid2 container spacing={2} px={4} display={'flex'} justifyContent={'end'}>
               <Grid2 size={{ xs: 12, lg: 6, md: 6, sm: 12 }}>
-                                <TextField
+                  <TextField
                   variant='outlined'
                   size='small'
                   value={tempSearchText}

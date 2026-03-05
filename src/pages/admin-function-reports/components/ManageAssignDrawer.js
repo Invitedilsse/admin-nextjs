@@ -16,6 +16,7 @@ import { reportFunctionListByUser } from 'src/services/pathConst'
 import { apiGet } from 'src/hooks/axios'
 import FunctionList from './functionList'
 import FunctionDetailsById from './functionDetailsById'
+import OfflineFunctionDetailsById from './offlineFunctionDet'
 // import AssignContacts from './assignContacts'
 // import WaCallertriggerTemplateList from './createMessageTemplate'
 // import ListAssignedCallers from './viewReports'
@@ -51,6 +52,7 @@ const FunctionDetailsDrawer = props => {
   const [functionDetails, setfunctionDetails] = useState(null)
 
 
+  console.log("RowData=====------>11",functionRowData)
 
   const handleChangeTabValue = (event, newValue) => {
     setTabValue(newValue)
@@ -170,7 +172,9 @@ const FunctionDetailsDrawer = props => {
         </Box>
         <TabPanel value={1}>
           <Fragment>
-              <FunctionDetailsById RowData={functionRowData} setfunctionDetails={setfunctionDetails}  handleCloseFunctionDetails={handleCloseFunctionDetails}/>
+             {functionRowData&&functionRowData.function === "online" && <FunctionDetailsById RowData={functionRowData} functionDetails={functionDetails} setfunctionDetails={setfunctionDetails}  handleCloseFunctionDetails={handleCloseFunctionDetails}/>} 
+             {functionRowData&&functionRowData.function === "offline" && <OfflineFunctionDetailsById RowData={functionRowData} setfunctionDetails={setfunctionDetails}  handleCloseFunctionDetails={handleCloseFunctionDetails}/>} 
+
           </Fragment>
         </TabPanel>
       </TabContext>
