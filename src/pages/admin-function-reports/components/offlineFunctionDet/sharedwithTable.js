@@ -9,7 +9,7 @@ import {
   Typography
 } from '@mui/material'
 
-export const SharedWithTable = ({ rows = [] }) => {
+ const SharedWithTable = ({ rows = [] }) => {
   if (!rows.length) {
     return (
       <Typography variant="body2" color="text.secondary">
@@ -56,3 +56,5 @@ export const SharedWithTable = ({ rows = [] }) => {
     </TableContainer>
   )
 }
+
+export default SharedWithTable
