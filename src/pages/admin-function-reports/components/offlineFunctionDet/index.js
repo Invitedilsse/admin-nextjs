@@ -1,19 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import {
-  Checkbox,
-  Button,
   Box,
-  CircularProgress,
   CardContent,
   Divider,
   Card,
   Dialog,
-  DialogTitle,
   DialogContent,
-  DialogContentText,
-  DialogActions,
-  Select,
-  MenuItem,
   CardHeader,
   TextField,
   IconButton,
@@ -34,7 +26,7 @@ import { makeStyles } from '@mui/styles'
 import { styled } from '@mui/material/styles'
 import Icon from 'src/@core/components/icon'
 import { Stack } from '@mui/system'
-import { SharedWithTable } from './sharedwithTable'
+import SharedWithTable from './components/sharedwithTable'
 
 const useStyles = makeStyles({
   root: {}
@@ -412,42 +404,6 @@ function OfflineFunctionDetailsById({ page, RowData, setfunctionDetails, handleC
         </DialogContent>
       </Dialog>
 
-      {/* <Stack direction="row" alignItems="center" spacing={2}>
-    <IconButton onClick={handlePrev} disabled={activeIndex === 0}>
-      ◀
-    </IconButton>
-
-    <Card sx={{ minWidth: 320 }}>
-      <CardContent>
-        <Typography variant="h6">
-          {offlineEventDetails[activeIndex]?.title}
-        </Typography>
-
-        <Typography variant="body2" color="text.secondary">
-          📍 {offlineEventDetails[activeIndex]?.location_name}
-        </Typography>
-
-        <Typography variant="body2">
-          📅 {new Date(offlineEventDetails[activeIndex]?.date).toLocaleDateString()} | 🕘 {offlineEventDetails[activeIndex]?.time}
-        </Typography>
-
-        <Button
-          size="small"
-          sx={{ mt: 1 }}
-          onClick={() => setOpenDialog(true)}
-        >
-          View Full Event
-        </Button>
-      </CardContent>
-    </Card>
-
-    <IconButton
-      onClick={handleNext}
-      disabled={activeIndex === offlineEventDetails.length - 1}
-    >
-      ▶
-    </IconButton>
-  </Stack> */}
       <Grid2 container spacing={6} mt={2}>
         <Grid2 size={{ xs: 12 }}>
           <Card
@@ -504,9 +460,6 @@ function OfflineFunctionDetailsById({ page, RowData, setfunctionDetails, handleC
             />
             <CardContent>
               <Stack spacing={1} mt={2}>
-                {/* <Typography variant="subtitle2" color="text.secondary">
-    Function Shared With
-  </Typography> */}
 
                 <SharedWithTable rows={offlineSahredDetails} />
               </Stack>
