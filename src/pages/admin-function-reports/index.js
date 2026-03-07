@@ -50,6 +50,7 @@ import { useSelector } from 'react-redux'
 import { set } from 'nprogress'
 import { LoadingButton } from '@mui/lab'
 import FunctionDetailsDrawer from './components/ManageAssignDrawer'
+import { useRouter } from 'next/router'
 // import AssignContactsDrawer from './components/ManageAssignDrawer'
 
 function ListUsers({ page }) {
@@ -72,6 +73,7 @@ const [addUserOpen, setAddUserOpen] = useState(false)
     pageIndex: 0,
     pageSize: 10
   })
+    const router = useRouter()
 
   const toggleAddUserDrawer = () => {
     // if (addUserOpen) {
@@ -89,7 +91,7 @@ const [addUserOpen, setAddUserOpen] = useState(false)
       Cell: ({ row }) =>   row.original.name || '-'
     },
     {
-      accessorKey: 'mobil',
+      accessorKey: 'mobile',
       header: 'Mobile',
       Cell: ({ row }) => row.original.mobile || '-' // Event/Trans/Acc/Other title
     },
