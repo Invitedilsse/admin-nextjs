@@ -29,8 +29,8 @@ import { DateRange } from "react-date-range";
 import { format } from "date-fns";
 import { apiGet } from "src/hooks/axios";
 
-import "react-date-range/dist/styles.css";
-import "react-date-range/dist/theme/default.css";
+// import "react-date-range/dist/styles.css";
+// import "react-date-range/dist/theme/default.css";
 import { baseURL } from "src/services/pathConst";
 import { useRouter } from "next/router";
 
@@ -38,7 +38,10 @@ const Home = () => {
   const [dashboardData, setDashboardData] = useState({});
   const [anchorEl, setAnchorEl] = useState(null);
   const[filType,setFiltype] = useState("today")
-
+  const[dateRange,setDateRange] = useState({
+    startdate:'',
+    endDate:''
+  })
   const [selectionRange, setSelectionRange] = useState({
     startDate: new Date(),
     endDate: new Date(),
@@ -71,7 +74,10 @@ const Home = () => {
       endDate: today,
       key: "selection"
     });
-
+    setDateRange({
+      startdate:format(start, "yyyy-MM-dd"),
+      endDate:format(today, "yyyy-MM-dd")
+    })
     fetchDashboard(format(start, "yyyy-MM-dd"), format(today, "yyyy-MM-dd"));
   };
 
@@ -83,7 +89,10 @@ const Home = () => {
       endDate,
       key: "selection"
     });
-
+  setDateRange({
+        startdate:format(startDate, "yyyy-MM-dd"),
+        endDate:format(endDate, "yyyy-MM-dd")
+      })
     fetchDashboard(format(startDate, "yyyy-MM-dd"), format(endDate, "yyyy-MM-dd"));
   };
 
@@ -102,20 +111,22 @@ const Home = () => {
       title: "Offline Functions",
       value: dashboardData?.offline_function_count || 0,
       color: "#ff9800",
-      route: '/users-history'
+      route: '/admin-function-reports'
 
     },
     {
       title: "Users",
       value: dashboardData?.user_count || 0,
       color: "#2196f3",
-      route: '/users-history'
+      // route: `/users-history?startdate=${dateRange.startdate}&endDate=${dateRange.endDate}`
+      route: `/users-history`
+
     },
     {
       title: "Family Connections",
       value: dashboardData?.familyconnection_count || 0,
       color: "#9c27b0",
-      route: '/users-history'
+      route: '/user-family'
 
     }
   ];
@@ -188,7 +199,20 @@ const Home = () => {
                 borderRadius: 3,
                 boxShadow: "0px 4px 12px rgba(0,0,0,0.1)"
               }}
-              onClick={()=>router.push(card.route)}
+              // onClick={()=>router.push(`${card.route}?startdate=${dateRange.startdate}&endDate=${dateRange.endDate}`)}
+              // onClick={()=>router.push(card.route)}
+              onClick={()=>{router.push({
+                    pathname: card.route,
+                    query:card.title.toLocaleLowerCase().includes("functions")?{
+                      sd: dateRange.startdate,
+                      ed: dateRange.endDate,
+                      type: card.title.toLocaleLowerCase() === 'functions' ? 'online':'offline'
+                    }: {
+                      sd: dateRange.startdate,
+                      ed: dateRange.endDate,
+                    }
+                  })}}
+
             >
               <CardContent>
                 <Typography variant="subtitle2" color="text.secondary">

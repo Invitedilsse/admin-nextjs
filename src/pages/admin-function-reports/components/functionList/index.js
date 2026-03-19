@@ -67,7 +67,9 @@ const Header = styled(Box)(({ theme }) => ({
   justifyContent: 'space-between'
 }))
 
-function FunctionList({ page,RowData,totalCount,setuserDetails,setFunctionRowData,handleCloseFunctionDetails }) {
+function FunctionList({ page,RowData,totalCount,setuserDetails,setFunctionRowData,handleCloseFunctionDetails,startdate,
+                    endDate,
+                    type }) {
   const [manualDrawerOpen, setManualDrawerOpen] = useState(false)
   const [templateDrawerOpen, setTemplateDrawerOpen] = useState(false)
   const [selectedRow, setSelectedRow] = useState(null)
@@ -265,7 +267,7 @@ const [addUserOpen, setAddUserOpen] = useState(false)
       setisdataloading(true)
       try {
         const response = await apiGet(
-          `${reportFunctionListByUser}?page=${pagination.pageIndex + 1}&limit=${pagination.pageSize}&search=${searchText}&userId=${RowData.id}`
+          `${reportFunctionListByUser}?page=${pagination.pageIndex + 1}&limit=${pagination.pageSize}&search=${searchText}&userId=${RowData.id}&start_date=${startdate}&end_date=${endDate}&type=${type} `
         )
         console.log('Push Notification Templates:', response.data)
         setContactsFunctionAll(response.data.data || [])

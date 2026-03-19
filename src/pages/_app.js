@@ -53,7 +53,8 @@ import SnackbarAlert from 'src/@core/layouts/components/shared-components/SnackB
 import ViewportProvider from 'src/context/ViewPortProvider'
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-
+import "react-date-range/dist/styles.css";
+import "react-date-range/dist/theme/default.css";
 
 const clientSideEmotionCache = createEmotionCache()
 

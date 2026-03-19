@@ -2,47 +2,33 @@
 
 import React, { useEffect, useState } from 'react'
 import {
-  Checkbox,
+
   Button,
   Box,
-  CircularProgress,
   CardContent,
   Divider,
   Card,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  Select,
-  MenuItem,
   CardHeader,
   TextField,
   IconButton,
-  Icon
+  Icon,
+Popover,
+Grid2,
+FormControl, InputLabel, Select, MenuItem
 } from '@mui/material'
-import Grid2 from '@mui/material/Grid2'
-import { DeleteOutline, Edit, Send, Visibility } from '@mui/icons-material'
+// import Grid2 from '@mui/material/Grid2'
+import {  Visibility } from '@mui/icons-material'
 import { MaterialReactTable, useMaterialReactTable } from 'material-react-table'
 
 // api hook
-import { apiDelete, apiGet, apiPatch, apiPut } from 'src/hooks/axios'
+import { apiDelete, apiGet, apiPatch,  } from 'src/hooks/axios'
 import {
-  assignFunctionContactList,
-    assignFunctionList,
   baseURL,
-  deleteCustomPushTemplates,
   deleteCustomPushTemplatesAllUsers,
   deleteCustomPushTemplatesFunUsers,
-  getCustomPushAdminTemplates,
-  getCustomPushAdminTemplatesFun,
-  getCustomPushTemplates,
   getnotification,
-  getPushTemplates,
   mapTemplatesHrs,
-  postCustomPushAdminTemplatesFun,
   reportUserList,
-  userListUrl
 } from 'src/services/pathConst'
 import toast from 'react-hot-toast'
 import { useSelector } from 'react-redux'
@@ -52,6 +38,9 @@ import { LoadingButton } from '@mui/lab'
 import FunctionDetailsDrawer from './components/ManageAssignDrawer'
 import { useRouter } from 'next/router'
 // import AssignContactsDrawer from './components/ManageAssignDrawer'
+import { useSearchParams } from "next/navigation";
+import { DateRange } from 'react-date-range';
+import { format } from 'date-fns';
 
 function ListUsers({ page }) {
   const [manualDrawerOpen, setManualDrawerOpen] = useState(false)
@@ -74,6 +63,18 @@ const [addUserOpen, setAddUserOpen] = useState(false)
     pageSize: 10
   })
     const router = useRouter()
+    const [anchorEl, setAnchorEl] = useState(null);
+    const searchParams = useSearchParams();
+    const [startdate,setStartDate] = useState(searchParams.get("sd")??'')
+    const [endDate,setEndDate] = useState(searchParams.get("ed")??'');
+    const [selectionRange, setSelectionRange] = useState({
+        // startDate:startdate !==''? startdate : new Date(),
+        // endDate: endDate !==''? endDate : new Date(),
+        startDate:startdate !==''? startdate : '',
+        endDate: endDate !==''? endDate : '',
+        key: "selection"
+      });
+  const [type,setType] = useState(searchParams.get("type")??'');
 
   const toggleAddUserDrawer = () => {
     // if (addUserOpen) {
@@ -249,7 +250,7 @@ const [addUserOpen, setAddUserOpen] = useState(false)
     setisdataloading(true)
     try {
       const response = await apiGet(
-        `${reportUserList}?page=${pagination.pageIndex + 1}&limit=${pagination.pageSize}&search=${searchText}`
+        `${reportUserList}?page=${pagination.pageIndex + 1}&limit=${pagination.pageSize}&search=${searchText}&start_date=${startdate}&end_date=${endDate}&type=${type}`
       )
       console.log('Push Notification Templates:', response.data)
       setContactsFunctionAll(response.data.data || [])
@@ -273,10 +274,30 @@ const [addUserOpen, setAddUserOpen] = useState(false)
     setTempSearchText(value)
   }
 
+      const handleDateChange = ranges => {
+      const { startDate:sdate, endDate:edate } = ranges.selection;
+  
+      setSelectionRange({
+        startDate:sdate,
+        endDate:edate,
+        key: "selection"
+      });
+      setStartDate(format(sdate, "yyyy-MM-dd"))
+      setEndDate(format(edate, "yyyy-MM-dd"))
+    }
+
+    const handleChange = (event) => {
+    const value = event.target.value;
+    setType(value);
+
+    console.log("Selected:", value);
+    // 👉 call API / filter logic here
+  };
+
   useEffect(() => {
     fetchData()
     // fetchConatctData()
-  }, [searchText,pagination?.pageIndex, pagination?.pageSize,])
+  }, [searchText,pagination?.pageIndex, pagination?.pageSize,startdate,endDate,type])
 
   return (
     <>
@@ -323,25 +344,71 @@ const [addUserOpen, setAddUserOpen] = useState(false)
                   }}
                 />
               </Grid2>
-              <Grid2 size={{ xs: 12, lg: 4, md: 4, sm: 12 }}></Grid2>
-              {/* <Grid2 size={{ xs: 12, lg: 2, md: 2, sm: 12 }}>
-                <Button
-                  fullWidth
-                  onClick={() => {
-                    dispatch(handleFunctionId(''))
-                    dispatch(handleFunction([]))
-                    setEid('')
-                    setEntireRow([])
-                    setEntireRow([])
-                    toggleAddUserDrawer()
-                  }}
-                  variant='contained'
-                  color='primary'
-                  sx={{ '& svg': { mr: 2 } }}
-                >
-                  Create Function
-                </Button>
-              </Grid2> */}
+              <Grid2 size={{ xs: 12, lg: 4, md: 4, sm: 12 }}>
+              <FormControl fullWidth size="small">
+                  <InputLabel>Function type</InputLabel>
+                  <Select
+                    value={type}
+                    label="Status"
+                    onChange={handleChange}
+                  >
+                    <MenuItem value="">None</MenuItem>
+                    <MenuItem value="online">Online</MenuItem>
+                    <MenuItem value="offline">Offline</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid2>
+               <Grid2 size={{ xs: 12, lg: 4, md: 4, sm: 12 }}>
+                       {/* DATE RANGE BUTTON */}
+              <Button
+                // variant={filType === "custom"?"contained":"outlined"}
+                variant={"contained"}
+                onClick={e => {
+                  // setFiltype("custom")
+                  setAnchorEl(e.currentTarget)
+                }}
+              >
+              {selectionRange.startDate ? format(selectionRange.startDate, "dd MMM yyyy") : 'Start Date'} -{" "}
+              {selectionRange.endDate   ? format(selectionRange.endDate,   "dd MMM yyyy") : 'End Date'}
+              </Button>
+
+            {/* DATE RANGE PICKER */}
+            <Popover
+              open={Boolean(anchorEl)}
+              anchorEl={anchorEl}
+              onClose={() => setAnchorEl(null)}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "right"
+              }}
+            >
+              <DateRange
+                ranges={[selectionRange]}
+                onChange={handleDateChange}
+                moveRangeOnFirstSelection={false}
+              />
+            </Popover>
+            </Grid2>
+             <Grid2 size={{ xs: 12, lg: 4, md: 4, sm: 12 }}>
+                       {/* DATE RANGE BUTTON */}
+              <Button
+                // variant={filType === "custom"?"contained":"outlined"}
+                variant={"contained"}
+                onClick={e => {
+                  // setFiltype("custom")
+                  setStartDate('')
+                  setEndDate('')
+                  setSelectionRange({
+                    startDate:'',
+                    endDate:'',
+                    key:'selection'
+                  })
+                  setType('')
+                }}
+              >
+                clear filter
+              </Button>
+            </Grid2>
             </Grid2>
             <Box p={4} mt={4}>
               <MaterialReactTable table={table} />
@@ -360,6 +427,9 @@ const [addUserOpen, setAddUserOpen] = useState(false)
                     // id={eid}
                     RowData={selectedRow}
                     getAll={() => {}}
+                    startdate={startdate}
+                    endDate={endDate}
+                    type={type}
                   />
                 </Card>
               </Grid2>

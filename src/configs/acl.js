@@ -17,9 +17,15 @@ const defineRulesFor = (role, subject) => {
     can('manage', 'assigntasks')
     can('manage', 'usermanage')
     can('manage', 'mapmanage')
+    can('manage', 'userlist')
+    can('manage','userfamily')
+    
 
 
 
+
+   accessible.action = 'manage'
+    accessible.subject = 'userfamily'
     accessible.action = 'manage';
     accessible.subject = 'accatee'
     accessible.action = 'manage'
@@ -30,7 +36,8 @@ const defineRulesFor = (role, subject) => {
     accessible.subject = 'mapmanage'
     accessible.action = 'manage'
     accessible.subject = 'functionreports'
-     
+     accessible.action = 'manage'
+    accessible.subject = 'userlist'
 
   } else if (role==='main') {
     // can('manage', 'all')
@@ -41,7 +48,13 @@ const defineRulesFor = (role, subject) => {
     can('manage', 'assigntasks')
     can('manage', 'usermanage')
     can('manage', 'mapmanage')
+    can('manage', 'userlist')
+    can('manage','userfamily')
 
+   accessible.action = 'manage'
+    accessible.subject = 'userfamily'
+    accessible.action = 'manage'
+    accessible.subject = 'userlist'
     accessible.action = 'manage';
     accessible.subject = 'accatee'
     accessible.action = 'manage'

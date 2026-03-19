@@ -82,6 +82,11 @@ console.log(user,eventsmapped)
 
         </CardContent>
 </Card>
+<Card sx={{ mb: 3 }}>
+    {/* <Header> */}
+              <Typography variant='h5' margin={4}>Function List</Typography>
+              {/* </Header> */}
+        <CardContent>
       {/* FUNCTIONS */}
       {eventsmapped.map((fn) => (
         <Card key={fn.id} sx={{ mb: 4 }}>
@@ -240,6 +245,8 @@ console.log(user,eventsmapped)
           </CardContent>
         </Card>
       ))}
+      </CardContent>
+      </Card>
     </Box>
   );
 };

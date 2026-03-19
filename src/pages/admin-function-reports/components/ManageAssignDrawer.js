@@ -35,7 +35,9 @@ const Header = styled(Box)(({ theme }) => ({
 
 const FunctionDetailsDrawer = props => {
   // ** Props
-  const { open = false, toggle, id, RowData, getAll } = props
+  const { open = false, toggle, id, RowData, getAll,startdate,
+                    endDate,
+                    type } = props
 
   // ** Hooks
   const classes = useStyles()
@@ -118,7 +120,10 @@ const FunctionDetailsDrawer = props => {
       </Box>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
 
-      <FunctionList RowData={RowData} totalCount={totalcount} setuserDetails={setuserDetails} setFunctionRowData={setFunctionRowData}/>
+      <FunctionList RowData={RowData} totalCount={totalcount} setuserDetails={setuserDetails} setFunctionRowData={setFunctionRowData} startdate={startdate}
+                    endDate={endDate}
+                    type={type}
+                    />
     </Box>
     </Box>
   ):(
@@ -172,8 +177,9 @@ const FunctionDetailsDrawer = props => {
         </Box>
         <TabPanel value={1}>
           <Fragment>
-             {functionRowData&&functionRowData.function === "online" && <FunctionDetailsById RowData={functionRowData} functionDetails={functionDetails} setfunctionDetails={setfunctionDetails}  handleCloseFunctionDetails={handleCloseFunctionDetails}/>} 
-             {functionRowData&&functionRowData.function === "offline" && <OfflineFunctionDetailsById RowData={functionRowData} setfunctionDetails={setfunctionDetails}  handleCloseFunctionDetails={handleCloseFunctionDetails}/>} 
+             {functionRowData&&functionRowData.function === "online" && <FunctionDetailsById RowData={functionRowData} functionDetails={functionDetails} setfunctionDetails={setfunctionDetails}  handleCloseFunctionDetails={handleCloseFunctionDetails} 
+                    />} 
+             {functionRowData&&functionRowData.function === "offline" && <OfflineFunctionDetailsById RowData={functionRowData} setfunctionDetails={setfunctionDetails}  handleCloseFunctionDetails={handleCloseFunctionDetails} />} 
 
           </Fragment>
         </TabPanel>

@@ -25,8 +25,7 @@ import { format } from 'date-fns';
 import { apiGet } from 'src/hooks/axios';
 import { baseURL } from 'src/services/pathConst';
 
-
-const UsersHistory = ({}) => {
+const UsersFamily = ({}) => {
   const [searchText, setSearchText] = useState('')
   const [tempSearchText, setTempSearchText] = useState('')
   const [totalcount, setTotalCount] = useState(0)
@@ -37,7 +36,6 @@ const UsersHistory = ({}) => {
   })
   const [userList, setUserList] = useState([])
 const router = useRouter()
-
 const [anchorEl, setAnchorEl] = useState(null);
 const searchParams = useSearchParams();
 const [startdate,setStartDate] = useState(searchParams.get("sd")??'')
@@ -50,15 +48,6 @@ const [selectionRange, setSelectionRange] = useState({
     key: "selection"
   });
 
-//   const searchParams = useSearchParams();
-// const startdate = searchParams.get("sd") ?? '';
-// const endDate   = searchParams.get("ed") ?? '';
-
-// const [selectionRange, setSelectionRange] = useState({
-//   startDate: startdate !== '' ? new Date(startdate) : new Date(),
-//   endDate:   endDate   !== '' ? new Date(endDate)   : new Date(),
-//   key: "selection"
-// });
 
 console.log("startdate----->",startdate,"endDate----->",endDate)
 
@@ -67,7 +56,7 @@ console.log("startdate----->",startdate,"endDate----->",endDate)
     setisdataloading(true)
     try {
       const response = await apiGet(
-        `${baseURL}function-reports/user-list-all?page=${pagination.pageIndex + 1}&limit=${pagination.pageSize}&search=${searchText}&sd=${startdate}&ed=${endDate}`
+        `${baseURL}function-reports/user-family-list?page=${pagination.pageIndex + 1}&limit=${pagination.pageSize}&search=${searchText}&sd=${startdate}&ed=${endDate}`
       )
       console.log('uses List--------->', response.data)
       setUserList(response.data.data || [])
@@ -96,14 +85,34 @@ console.log("startdate----->",startdate,"endDate----->",endDate)
 
   const generateColumns = ({ onTemplateClick }) => [
     {
-      accessorKey: 'name',
-      header: 'Name',
-      Cell: ({ row }) => row.original.name || '-'
+      accessorKey: 'member name',
+      header: 'Member Name',
+      Cell: ({ row }) => row.original.member_name || '-'
     },
     {
-      accessorKey: 'mobile',
-      header: 'Mobile',
-      Cell: ({ row }) => row.original.mobile || '-' // Event/Trans/Acc/Other title
+      accessorKey: 'member mobile',
+      header: 'Member Mobile',
+      Cell: ({ row }) => row.original.member_mobile || '-' // Event/Trans/Acc/Other title
+    },
+     {
+      accessorKey: 'creator name',
+      header: 'Creator Name',
+      Cell: ({ row }) => row.original.creator_name || '-'
+    },
+    {
+      accessorKey: 'creator mobile',
+      header: 'Creator Mobile',
+      Cell: ({ row }) => row.original.creator_mobile || '-' // Event/Trans/Acc/Other title
+    },
+    {
+      accessorKey: 'creator mobile',
+      header: 'Creator Mobile',
+      Cell: ({ row }) => row.original.creator_mobile || '-' // Event/Trans/Acc/Other title
+    },
+     {
+      accessorKey: 'creator At',
+      header: 'Creator At',
+      Cell: ({ row }) => row.original.created_at || '-' // Event/Trans/Acc/Other title
     },
     {
       accessorKey: 'Action',
@@ -157,7 +166,6 @@ console.log("startdate----->",startdate,"endDate----->",endDate)
     setStartDate(format(sdate, "yyyy-MM-dd"))
     setEndDate(format(edate, "yyyy-MM-dd"))
   }
-
   return (
     <>
       <Grid2 container spacing={6}>
@@ -260,4 +268,4 @@ console.log("startdate----->",startdate,"endDate----->",endDate)
   )
 }
 
-export default UsersHistory
+export default UsersFamily
