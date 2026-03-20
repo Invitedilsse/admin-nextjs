@@ -68,8 +68,12 @@ console.log("startdate----->",startdate,"endDate----->",endDate)
     }
   }
 
-    const fetchuserData = async (d) => {
+    const fetchuserData = async (d,type) => {
+      if(type === 'm')
         router.push(`/users-history/${d.id}`)
+      else
+        router.push(`/users-history/${d.creator_id}`)
+
   }
 
   const handleDebouncedSearch = value => {
@@ -104,22 +108,26 @@ console.log("startdate----->",startdate,"endDate----->",endDate)
       header: 'Creator Mobile',
       Cell: ({ row }) => row.original.creator_mobile || '-' // Event/Trans/Acc/Other title
     },
-    {
-      accessorKey: 'creator mobile',
-      header: 'Creator Mobile',
-      Cell: ({ row }) => row.original.creator_mobile || '-' // Event/Trans/Acc/Other title
-    },
      {
-      accessorKey: 'creator At',
-      header: 'Creator At',
+      accessorKey: 'created At',
+      header: 'Created At',
       Cell: ({ row }) => row.original.created_at || '-' // Event/Trans/Acc/Other title
     },
     {
       accessorKey: 'Action',
-      header: 'View In Detail',
+      header: 'View Member In Detail',
       Cell: ({ row }) => (
         <>
-          <Visibility onClick={() => onTemplateClick(row.original)} style={{ cursor: 'pointer', marginRight: 8 }} />
+          <Visibility onClick={() => onTemplateClick(row.original,'m')} style={{ cursor: 'pointer', marginRight: 8 }} />
+        </>
+      )
+    },
+     {
+      accessorKey: 'Action',
+      header: 'View Creator In Detail',
+      Cell: ({ row }) => (
+        <>
+          <Visibility onClick={() => onTemplateClick(row.original,'c')} style={{ cursor: 'pointer', marginRight: 8 }} />
         </>
       )
     }
