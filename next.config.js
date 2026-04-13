@@ -20,7 +20,10 @@ module.exports = {
     KEY: process.env.NEXT_PUBLIC_API_KEY,
     // Add other environment variables you need
     NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
-    SOCKETKEY: process.env.NEXT_PUBLIC_BASE_URL_SOCKET
+    SOCKETKEY: process.env.NEXT_PUBLIC_BASE_URL_SOCKET,
+    BLUEWAABA_URL: process.env.NEXT_BLUEWAABA_URL,
+    BLUEWAABA_TOKEN: process.env.NEXT_BLUEWAABA_TOKEN,
+
   },
   webpack: config => {
     config.resolve.alias = {

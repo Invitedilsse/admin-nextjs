@@ -1,0 +1,268 @@
+//     <>
+//   <Box sx={{ p: 4 }}>
+//     {/* HEADER */}
+//     <Box display="flex" justifyContent="space-between" alignItems="center">
+//       <Typography variant="h5">
+//         {id ? 'Edit Template' : 'Create Template'}
+//       </Typography>
+//       <IconButton onClick={toggle}>
+//         <Icon icon="tabler:x" />
+//       </IconButton>
+//     </Box>
+
+//     <Divider sx={{ my: 2 }} />
+
+//     <Formik
+//       initialValues={{
+//         template_name: RowData?._id || ''
+//       }}
+//       enableReinitialize
+//       onSubmit={handleSubmit}
+//     >
+//       {({ values, setFieldValue, isSubmitting }) => (
+//         <Form>
+//           {/* TEMPLATE DROPDOWN */}
+//           <Typography variant="h6" sx={{ mt: 2 }}>
+//             Template Name
+//           </Typography>
+
+//           <FormControl fullWidth size="small" sx={{ mt: 1 }}>
+//             <Select
+//               value={values.template_name}
+//               onChange={(e) => {
+//                 const selectedId = e.target.value;
+//                 setFieldValue('template_name', selectedId);
+
+//                 if (selectedId) {
+//                   filtertemplateDetails(selectedId);
+//                 }
+//               }}
+//               displayEmpty
+//             >
+//               <MenuItem value="">Select Template</MenuItem>
+
+//               {templates.map((item) => (
+//                 <MenuItem key={item._uid} value={item._id}>
+//                   {item.template_name}
+//                 </MenuItem>
+//               ))}
+
+//               {loading && <MenuItem disabled>Loading...</MenuItem>}
+
+//               {hasMore && !loading && (
+//                 <MenuItem
+//                   onMouseDown={(e) => {
+//                     e.preventDefault();
+//                     setPage((prev) => prev + 1);
+//                   }}
+//                   sx={{ justifyContent: 'center', fontWeight: 'bold' }}
+//                 >
+//                   Load More...
+//                 </MenuItem>
+//               )}
+//             </Select>
+//           </FormControl>
+
+//           {/* MAIN LAYOUT */}
+//           {values.template_name !== '' && (
+//             <>
+//               <Grid2 container spacing={2} mt={2}>
+                
+//                 {/* LEFT SIDE → 75% */}
+//                 <Grid2 xs={12} md={9}>
+//                   <Card sx={{ p: 2 }}>
+                    
+//                     <Typography variant="subtitle1" fontWeight={600}>
+//                       Template Details
+//                     </Typography>
+
+//                     <Typography variant="body2">
+//                       Name: {templateDetails?.template_name}
+//                     </Typography>
+//                     <Typography variant="body2">
+//                       Language: {templateDetails?.language}
+//                     </Typography>
+//                     <Typography variant="body2">
+//                       Category: {templateDetails?.category}
+//                     </Typography>
+
+//                     {/* HEADER IMAGE */}
+//                     {templateHeaderImgComp && (
+//                       <Box mt={3}>
+//                         <Typography variant="subtitle2">
+//                           Header Image
+//                         </Typography>
+
+//                         <Button
+//                           variant="outlined"
+//                           component="label"
+//                           sx={{ mt: 1 }}
+//                           disabled={uploading}
+//                         >
+//                           {imageFile ? 'Re-Upload' : 'Upload'}
+//                           <input
+//                             type="file"
+//                             hidden
+//                             accept="image/*"
+//                             onChange={(e) => handleFileUpload(e, 'template')}
+//                           />
+//                         </Button>
+
+//                         {imageFile && (
+//                           <Box mt={2}>
+//                             <img
+//                               src={imageFile}
+//                               alt="preview"
+//                               width={120}
+//                               style={{ borderRadius: 8 }}
+//                             />
+//                           </Box>
+//                         )}
+//                       </Box>
+//                     )}
+
+//                     {/* INPUT FIELDS */}
+//                     {templateBodyComp && (
+//                       <Box mt={4}>
+//                         <Typography variant="subtitle1" fontWeight={600} mb={2}>
+//                           Input Fields
+//                         </Typography>
+
+//                         {Array.from({ length: templateBodyInpCount }, (_, i) => {
+//                           const fieldKey = `field_${i + 1}`;
+//                           const typeKey = `field_${i + 1}_type`;
+
+//                           return (
+//                             <Box
+//                               key={i}
+//                               sx={{
+//                                 display: 'flex',
+//                                 gap: 2,
+//                                 alignItems: 'center',
+//                                 mb: 2,
+//                                 p: 2,
+//                                 border: '1px solid #eee',
+//                                 borderRadius: 2
+//                               }}
+//                             >
+//                               <Typography sx={{ minWidth: 50 }}>
+//                                 {`{{${i + 1}}}`}
+//                               </Typography>
+
+//                               <FormControl size="small" sx={{ minWidth: 120 }}>
+//                                 <Select
+//                                   value={values[typeKey] || 'text'}
+//                                   onChange={(e) => {
+//                                     setFieldValue(typeKey, e.target.value);
+//                                     setFieldValue(fieldKey, '');
+//                                   }}
+//                                 >
+//                                   <MenuItem value="text">Text</MenuItem>
+//                                   <MenuItem value="dropdown">Dropdown</MenuItem>
+//                                 </Select>
+//                               </FormControl>
+
+//                               {values[typeKey] === 'dropdown' ? (
+//                                 <FormControl fullWidth size="small">
+//                                   <Select
+//                                     value={values[fieldKey] || ''}
+//                                     onChange={(e) =>
+//                                       setFieldValue(fieldKey, e.target.value)
+//                                     }
+//                                   >
+//                                     <MenuItem value="">Select Value</MenuItem>
+//                                     <MenuItem value="event">Event</MenuItem>
+//                                     <MenuItem value="date">Date</MenuItem>
+//                                     <MenuItem value="name">Name</MenuItem>
+//                                   </Select>
+//                                 </FormControl>
+//                               ) : (
+//                                 <TextField
+//                                   fullWidth
+//                                   size="small"
+//                                   placeholder={`Enter {{${i + 1}}}`}
+//                                   value={values[fieldKey] || ''}
+//                                   onChange={(e) =>
+//                                     setFieldValue(fieldKey, e.target.value)
+//                                   }
+//                                 />
+//                               )}
+//                             </Box>
+//                           );
+//                         })}
+//                       </Box>
+//                     )}
+//                   </Card>
+//                 </Grid2>
+
+//                 {/* RIGHT SIDE → 25% */}
+//                 <Grid2 xs={12} md={3}>
+//                   <Card
+//                     sx={{
+//                       p: 2,
+//                       background: '#ece5dd',
+//                       position: 'sticky',
+//                       top: 20
+//                     }}
+//                   >
+//                     <Typography fontWeight={600} mb={1}>
+//                       Sample View
+//                     </Typography>
+
+//                     <Box
+//                       sx={{
+//                         background: '#fff',
+//                         borderRadius: 2,
+//                         overflow: 'hidden'
+//                       }}
+//                     >
+//                       {templateHeaderImgComp && (
+//                         <Box
+//                           component="img"
+//                           src={
+//                            imageFile ? imageFile: templateHeaderImgComp?.example?.header_handle?.[0]
+//                           }
+//                           sx={{ width: '100%', height: 150, objectFit: 'cover' }}
+//                         />
+//                       )}
+
+//                       {templateBodyComp && (
+//                         <Box p={2}>
+//                           <Typography sx={{ whiteSpace: 'pre-line' }}>
+//                             {/* {highlightVariables(templateBodyComp?.text)} */}
+//                             {renderTemplateWithValues(templateBodyComp?.text, values)}
+//                           </Typography>
+//                         </Box>
+//                       )}
+//                     </Box>
+//                   </Card>
+//                 </Grid2>
+//               </Grid2>
+
+//               {/* ACTIONS */}
+//               <Box sx={{ display: 'flex', gap: 2, mt: 4 }}>
+//                 <LoadingButton
+//                   variant="outlined"
+//                   fullWidth
+//                   onClick={toggle}
+//                   disabled={isSubmitting}
+//                 >
+//                   Cancel
+//                 </LoadingButton>
+
+//                 <LoadingButton
+//                   variant="contained"
+//                   fullWidth
+//                   type="submit"
+//                   loading={isSubmitting}
+//                 >
+//                   {id ? 'Update' : 'Create'}
+//                 </LoadingButton>
+//               </Box>
+//             </>
+//           )}
+//         </Form>
+//       )}
+//     </Formik>
+//   </Box>
+//     </>

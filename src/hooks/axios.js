@@ -172,6 +172,24 @@ export function apiPostWithCustomToken(path, data, token) {
   return axios.post(path, data, config);
 }
 
+
+/**
+ *
+ * @param {*} path  endpoint
+ * @returns data from api
+ */
+export async function apiGetwithCustomToken(path,token) {
+  // const authToken = await getAccessToken();
+  const config = {
+    headers: {
+      authorization: token ? `${token}` : null,
+      "Content-Type": "application/json",
+    },
+  };
+  return axios.get(path, config);
+}
+
+
 const instance = axios.create();
 
 export default instance;

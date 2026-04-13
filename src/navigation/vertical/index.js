@@ -69,7 +69,14 @@ const navigation = () => {
     icon: 'ri:admin-fill',
     action: 'read',
     subject: 'adminpanel'
-  }
+  },
+      {
+      title: 'Campaign Management',
+      path: '/campaign',
+      icon: 'maki:information',
+      action: 'read',
+      subject: 'campaign'
+    }
 ]
 }
 
