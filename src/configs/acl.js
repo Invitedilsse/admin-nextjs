@@ -20,6 +20,7 @@ const defineRulesFor = (role, subject) => {
     can('manage', 'userlist')
     can('manage','userfamily')
     can('manage','campaign')
+    can('manage','adcreation')
     
 
 
@@ -39,7 +40,10 @@ const defineRulesFor = (role, subject) => {
     accessible.subject = 'functionreports'
      accessible.action = 'manage'
     accessible.subject = 'userlist'
-    accessible.action = 'campaign'
+     accessible.action = 'manage'
+    accessible.subject = 'campaign'
+     accessible.action = 'manage'
+    accessible.subject = 'adcreation'
 
   } else if (role==='main') {
     // can('manage', 'all')
@@ -53,7 +57,8 @@ const defineRulesFor = (role, subject) => {
     can('manage', 'userlist')
     can('manage','userfamily')
     can('manage','campaign')
-    
+     can('manage','adcreation')
+
     accessible.action = 'campaign'
     accessible.action = 'manage'
     accessible.subject = 'userfamily'
@@ -69,7 +74,8 @@ const defineRulesFor = (role, subject) => {
     accessible.subject = 'assigntasks'
     accessible.action = 'manage'
     accessible.subject = 'functionreports'
-    
+         accessible.action = 'manage'
+    accessible.subject = 'adcreation'
 
   } else if (role === 'support') {
     // can(['read'], 'acl-page')

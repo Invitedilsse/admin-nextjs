@@ -76,6 +76,13 @@ const navigation = () => {
       icon: 'maki:information',
       action: 'read',
       subject: 'campaign'
+    },
+    {
+      title: 'Advertisement Creation',
+      path: '/adcreation',
+      icon: 'maki:calendar',
+      action: 'read',
+      subject: 'adcreation'
     }
 ]
 }
