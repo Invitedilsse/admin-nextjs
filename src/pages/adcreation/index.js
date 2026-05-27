@@ -189,7 +189,7 @@ function AdTemplateList({ RowData }) {
   const fetchData = async () => {
     //fetch data from the api and set it to the state
     try {
-      const response = await apiGet(`${baseURL}ad/list-advertisment?is_active=true&page=1&limit=10`)
+      const response = await apiGet(`${baseURL}ad/list-advertisment?is_active=&page=1&limit=10`)
       
 
       console.log('ad list Templates:',response?.data?.data)
