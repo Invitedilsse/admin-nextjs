@@ -193,6 +193,7 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
         offer_header:    values.offer_header     || null,
         offer_subheader: values.offer_subheader  || null,
         offer_details:   values.offer_details    || null,
+        link_btn_text:   values.link_btn_text  || null,
         // ─────────────────────────────────────────────
         ui_config:       values.ui_config,
       }
@@ -300,6 +301,8 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
                     offer_header:    RowData?.offer_header    || '',
                     offer_subheader: RowData?.offer_subheader || '',
                     offer_details:   RowData?.offer_details   || '',
+                    link_btn_text:   RowData?.link_btn_text   || null,
+
                     // ─────────────────────────────────────────────
                     rules:           initialRules,
                     ui_config:       RowData?.ui_config       || DEFAULT_UI_CONFIG
@@ -463,7 +466,14 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
                         placeholder='Describe the offer, terms, or any additional info…'
                         sx={{ mt: 2 }}
                       />
-
+                        <TextField
+                        fullWidth 
+                        // multiline rows={3}
+                        label='Link Button Text' name='link_btn_text'
+                        value={values.link_btn_text} onChange={handleChange}
+                        placeholder='e.g. Shop Now'
+                        sx={{ mt: 2 }}
+                      />
                       {/* ══════════════════════════════════════════
                           SECTION 4 — FILE UPLOAD
                       ══════════════════════════════════════════ */}
