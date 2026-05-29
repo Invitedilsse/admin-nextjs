@@ -1,26 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import {
-  Box,
-  Typography,
-  TextField,
-  IconButton,
-  Divider,
-  Button,
-  Card,
-  CardContent,
-  Switch,
-  FormControlLabel,
-  MenuItem,
-  Grid2,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Chip,
-  Tooltip,
-  CircularProgress,
-  Alert,
-  Avatar,
-  Badge
+  Box, Typography, TextField, IconButton, Divider, Button,
+  Card, CardContent, Switch, FormControlLabel, MenuItem,
+  Grid2, Accordion, AccordionSummary, AccordionDetails,
+  Chip, Tooltip, CircularProgress, Alert, Avatar, Badge
 } from '@mui/material'
 import { CameraAlt } from '@mui/icons-material'
 import { LoadingButton } from '@mui/lab'
@@ -34,29 +17,34 @@ import { HexColorPicker } from 'react-colorful'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const socialOptions = ['facebook', 'instagram', 'whatsapp', 'telegram', 'youtube', 'x', 'website', 'google', 'shop']
+const socialOptions = [
+  'facebook', 'instagram', 'whatsapp', 'telegram',
+  'youtube', 'x', 'website', 'google', 'shop'
+]
+
+const AD_DISPLAY_TYPES = [
+  { value: 'standard',   label: 'Standard'    },
+  { value: 'popup',      label: 'Popup'       },
+  { value: 'video',      label: 'Video'       },
+  { value: 'banner',     label: 'Banner'      },
+  { value: 'fullscreen', label: 'Full Screen' },
+]
 
 const EMPTY_RULE = {
-  page_name: '',
-  slot_name: '',
-  priority: 0,
-  min_interval_seconds: 0,
-  max_shows_per_user: 0,
-  max_shows_per_day: 0,
-  max_shows_per_session: 0,
-  start_at: '',
-  end_at: '',
-  is_enabled: true
+  page_name: '', slot_name: '', priority: 0,
+  min_interval_seconds: 0, max_shows_per_user: 0,
+  max_shows_per_day: 0, max_shows_per_session: 0,
+  start_at: '', end_at: '', is_enabled: true
 }
 
 const DEFAULT_UI_CONFIG = {
-  text_color: '#111111',
-  body_color: '#444444',
-  footer_color: '#666666',
-  button_bg_color: '#FF6B00',
+  text_color:        '#111111',
+  body_color:        '#444444',
+  footer_color:      '#666666',
+  button_bg_color:   '#FF6B00',
   button_text_color: '#FFFFFF',
-  card_bg_color: '#FFFFFF',
-  border_color: '#E5E7EB'
+  card_bg_color:     '#FFFFFF',
+  border_color:      '#E5E7EB'
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -64,24 +52,24 @@ const DEFAULT_UI_CONFIG = {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
-  // ── File / rules loading states ────────────────────────────────────────────
-  const [uploading, setUploading] = useState(false)
+  // ── Loading states ─────────────────────────────────────────────────────────
+  const [uploading,    setUploading]    = useState(false)
   const [rulesLoading, setRulesLoading] = useState(false)
   const [initialRules, setInitialRules] = useState([])
 
-  // ── Logo states (mirrors SideBarGiftType pattern) ─────────────────────────
-  const fileInputRef = useRef()
-  const [logoFormData, setLogoFormData] = useState(null) // FormData for upload
-  const [openImageEdit, setOpenImageEdit] = useState(false)
-  const [cropImage, setCropImage] = useState(undefined)
-  const [cropType, setCropType] = useState('logo')
+  // ── Logo states ────────────────────────────────────────────────────────────
+  const fileInputRef      = useRef()
+  const [logoFormData,    setLogoFormData]    = useState(null)
+  const [openImageEdit,   setOpenImageEdit]   = useState(false)
+  const [cropImage,       setCropImage]       = useState(undefined)
+  const [cropType,        setCropType]        = useState('logo')
   const [cropAspectRatio, setCropAspectRatio] = useState(1 / 1)
-  const [isPreview, setIsPreview] = useState(true)
+  const [isPreview,       setIsPreview]       = useState(true)
 
   // ── Fetch existing rules when editing ──────────────────────────────────────
   useEffect(() => {
     if (id) fetchExistingRules()
-    else setInitialRules([])
+    else    setInitialRules([])
   }, [id])
 
   const fetchExistingRules = async () => {
@@ -96,16 +84,12 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
     }
   }
 
-  // ── Logo: hidden file input onChange (feeds into cropper) ─────────────────
+  // ── Logo handlers ──────────────────────────────────────────────────────────
   const onFileInputChange = e => {
     e.preventDefault()
     const files = e.target?.files
     if (!files?.length) return
-
-    if (files[0].size > 5000000) {
-      toast.error('File size should be below 5MB')
-      return
-    }
+    if (files[0].size > 5000000) { toast.error('File size should be below 5MB'); return }
     const reader = new FileReader()
     reader.onload = () => {
       setCropImage(reader.result)
@@ -116,7 +100,6 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
     reader.readAsDataURL(files[0])
   }
 
-  // ── Logo: camera icon click ────────────────────────────────────────────────
   const handleEditLogo = () => {
     setIsPreview(true)
     setCropAspectRatio(1 / 1)
@@ -124,13 +107,9 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
     fileInputRef.current.click()
   }
 
-  // ── Logo: cropper callback (mirrors uploadImage in SideBarGiftType) ────────
   const handleLogoUpload = (type, file, isDelete = false) => {
     setOpenImageEdit(false)
-    if (isDelete) {
-      setLogoFormData(null)
-      return
-    }
+    if (isDelete) { setLogoFormData(null); return }
     if (type === 'logo' && file) {
       const formData = new FormData()
       formData.append('file', file)
@@ -142,25 +121,20 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
   const handleFileUpload = async (event, values, setFieldValue) => {
     const selectedFiles = Array.from(event.target.files)
     if (!selectedFiles?.length) return
-
     try {
       setUploading(true)
       const uploadedFiles = []
-
       for (const file of selectedFiles) {
         const formData = new FormData()
         formData.append('file', file)
-        const res = await apiPost(`${baseURL}admin/upload-doc`, formData, true)
+        const res  = await apiPost(`${baseURL}admin/upload-doc`, formData, true)
         const data = res?.data?.detail || res?.data
-
         let fileType = 'file'
-        if (file.type.startsWith('image')) fileType = 'image'
+        if      (file.type.startsWith('image')) fileType = 'image'
         else if (file.type.startsWith('audio')) fileType = 'audio'
         else if (file.type.startsWith('video')) fileType = 'video'
-
         uploadedFiles.push({ key: data?.key, url: data?.url, type: fileType, file_name: data?.file_name })
       }
-
       setFieldValue('files', [...values.files, ...uploadedFiles])
       toast.success('Files uploaded successfully')
     } catch (err) {
@@ -178,10 +152,7 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
         await apiDelete(`${baseURL}ad/delete-advertisment-rule/${rule.id}`)
         toast.success('Rule removed')
       }
-      setFieldValue(
-        'rules',
-        values.rules.filter((_, i) => i !== index)
-      )
+      setFieldValue('rules', values.rules.filter((_, i) => i !== index))
     } catch {
       toast.error('Could not delete rule')
     }
@@ -190,38 +161,40 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
   // ── Main submit ────────────────────────────────────────────────────────────
   const handleSubmit = async values => {
     try {
-      // 1. Upload logo if a new one was selected via the cropper
-      let logoPayload = values.logo || null // existing logo JSONB or null
-
+      // 1. Upload logo if newly selected
+      let logoPayload = values.logo || null
       if (logoFormData) {
-        const logoRes = await apiPost(`${baseURL}admin/upload-doc`, logoFormData, true)
+        const logoRes  = await apiPost(`${baseURL}admin/upload-doc`, logoFormData, true)
         const logoData = logoRes?.data?.detail || logoRes?.data
-        logoPayload = {
-          key: logoData?.key,
-          url: logoData?.url,
-          file_name: logoData?.file_name
-        }
+        logoPayload    = { key: logoData?.key, url: logoData?.url, file_name: logoData?.file_name }
       }
 
       // 2. Upsert advertisement
       const adPayload = {
         ...(id && { id }),
-        name: values.name,
-        logo: logoPayload,
-        header: values.header || null,
-        subheader: values.subheader || null,
-        body: values.body || null,
-        footer: values.footer || null,
-        is_active: values.is_active,
-        files: values.files,
-        contact_us: values.contact_us || null,
-        linkname_1: values.linkname_1 || null,
-        link_1: values.link_1 || null,
-        linkname_2: values.linkname_2 || null,
-        link_2: values.link_2 || null,
-        linkname_3: values.linkname_3 || null,
-        link_3: values.link_3 || null,
-        ui_config: values.ui_config
+        name:            values.name,
+        logo:            logoPayload,
+        header:          values.header          || null,
+        subheader:       values.subheader        || null,
+        body:            values.body             || null,
+        footer:          values.footer           || null,
+        is_active:       values.is_active,
+        files:           values.files,
+        contact_us:      values.contact_us       || null,
+        linkname_1:      values.linkname_1       || null,
+        link_1:          values.link_1           || null,
+        linkname_2:      values.linkname_2       || null,
+        link_2:          values.link_2           || null,
+        linkname_3:      values.linkname_3       || null,
+        link_3:          values.link_3           || null,
+        // ── new fields ──────────────────────────────
+        ad_type:         values.ad_type          || null,
+        ad_display_type: values.ad_display_type  || null,
+        offer_header:    values.offer_header     || null,
+        offer_subheader: values.offer_subheader  || null,
+        offer_details:   values.offer_details    || null,
+        // ─────────────────────────────────────────────
+        ui_config:       values.ui_config,
       }
 
       const adRes = await apiPost(`${baseURL}ad/upsert-advertisment`, adPayload)
@@ -235,17 +208,17 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
         validRules.map(rule =>
           apiPost(`${baseURL}ad/upsert-advertisment-rule`, {
             ...(rule.id && { id: rule.id }),
-            ad_id: adId,
-            page_name: rule.page_name,
-            slot_name: rule.slot_name,
-            priority: Number(rule.priority) || 0,
-            min_interval_seconds: Number(rule.min_interval_seconds) || 0,
-            max_shows_per_user: Number(rule.max_shows_per_user) || 0,
-            max_shows_per_day: Number(rule.max_shows_per_day) || 0,
+            ad_id:                 adId,
+            page_name:             rule.page_name,
+            slot_name:             rule.slot_name,
+            priority:              Number(rule.priority)              || 0,
+            min_interval_seconds:  Number(rule.min_interval_seconds)  || 0,
+            max_shows_per_user:    Number(rule.max_shows_per_user)    || 0,
+            max_shows_per_day:     Number(rule.max_shows_per_day)     || 0,
             max_shows_per_session: Number(rule.max_shows_per_session) || 0,
-            start_at: rule.start_at || null,
-            end_at: rule.end_at || null,
-            is_enabled: rule.is_enabled
+            start_at:              rule.start_at || null,
+            end_at:                rule.end_at   || null,
+            is_enabled:            rule.is_enabled
           })
         )
       )
@@ -268,7 +241,9 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
 
           <CardContent>
             <Box sx={{ p: 4 }}>
-              <Typography variant='h5'>{id ? 'Edit Advertisement' : 'Create Advertisement'}</Typography>
+              <Typography variant='h5'>
+                {id ? 'Edit Advertisement' : 'Create Advertisement'}
+              </Typography>
 
               <Divider sx={{ my: 3 }} />
 
@@ -304,28 +279,36 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
                 <Formik
                   enableReinitialize
                   initialValues={{
-                    name: RowData?.name || '',
-                    logo: RowData?.logo || null, // existing JSONB { key, url, file_name }
-                    header: RowData?.header || '',
-                    subheader: RowData?.subheader || '',
-                    body: RowData?.body || '',
-                    footer: RowData?.footer || '',
-                    is_active: RowData?.is_active ?? true,
-                    files: RowData?.files || [],
-                    contact_us: RowData?.contact_us || '',
-                    linkname_1: RowData?.linkname_1 || '',
-                    link_1: RowData?.link_1 || '',
-                    linkname_2: RowData?.linkname_2 || '',
-                    link_2: RowData?.link_2 || '',
-                    linkname_3: RowData?.linkname_3 || '',
-                    link_3: RowData?.link_3 || '',
-                    rules: initialRules,
-                    ui_config: RowData?.ui_config || DEFAULT_UI_CONFIG
+                    name:            RowData?.name            || '',
+                    logo:            RowData?.logo            || null,
+                    header:          RowData?.header          || '',
+                    subheader:       RowData?.subheader       || '',
+                    body:            RowData?.body            || '',
+                    footer:          RowData?.footer          || '',
+                    is_active:       RowData?.is_active       ?? true,
+                    files:           RowData?.files           || [],
+                    contact_us:      RowData?.contact_us      || '',
+                    linkname_1:      RowData?.linkname_1      || '',
+                    link_1:          RowData?.link_1          || '',
+                    linkname_2:      RowData?.linkname_2      || '',
+                    link_2:          RowData?.link_2          || '',
+                    linkname_3:      RowData?.linkname_3      || '',
+                    link_3:          RowData?.link_3          || '',
+                    // ── new fields ──────────────────────────────
+                    ad_type:         RowData?.ad_type         || 'sponsored',
+                    ad_display_type: RowData?.ad_display_type || 'standard',
+                    offer_header:    RowData?.offer_header    || '',
+                    offer_subheader: RowData?.offer_subheader || '',
+                    offer_details:   RowData?.offer_details   || '',
+                    // ─────────────────────────────────────────────
+                    rules:           initialRules,
+                    ui_config:       RowData?.ui_config       || DEFAULT_UI_CONFIG
                   }}
                   onSubmit={handleSubmit}
                 >
                   {({ values, handleChange, setFieldValue, isSubmitting }) => (
                     <Form>
+
                       {/* ══════════════════════════════════════════
                           SECTION 0 — LOGO
                       ══════════════════════════════════════════ */}
@@ -341,11 +324,8 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
                               onClick={handleEditLogo}
                               size='small'
                               sx={{
-                                bgcolor: 'white',
-                                width: 26,
-                                height: 26,
-                                border: '1px solid',
-                                borderColor: 'divider',
+                                bgcolor: 'white', width: 26, height: 26,
+                                border: '1px solid', borderColor: 'divider',
                                 '&:hover': { bgcolor: 'grey.100' }
                               }}
                             >
@@ -356,8 +336,9 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
                           <Avatar
                             alt='Ad Logo'
                             src={
-                              // Priority: newly selected (object URL from cropper) → existing saved URL
-                              logoFormData ? URL.createObjectURL(logoFormData.get('file')) : values.logo?.url || ''
+                              logoFormData
+                                ? URL.createObjectURL(logoFormData.get('file'))
+                                : values.logo?.url || ''
                             }
                             variant='rounded'
                             sx={{ width: 88, height: 88, border: '1px solid', borderColor: 'divider' }}
@@ -371,19 +352,12 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
                           <Typography variant='caption' color='text.secondary'>
                             JPG, PNG or WebP · max 5 MB
                           </Typography>
-
-                          {/* Clear logo */}
                           {(logoFormData || values.logo) && (
                             <Box sx={{ mt: 1 }}>
                               <Button
-                                size='small'
-                                color='error'
-                                variant='text'
+                                size='small' color='error' variant='text'
                                 startIcon={<Icon icon='tabler:trash' />}
-                                onClick={() => {
-                                  setLogoFormData(null)
-                                  setFieldValue('logo', null)
-                                }}
+                                onClick={() => { setLogoFormData(null); setFieldValue('logo', null) }}
                               >
                                 Remove logo
                               </Button>
@@ -400,48 +374,16 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
 
                       <SectionLabel label='Advertisement Details' />
 
-                      <TextField
-                        fullWidth
-                        label='Name'
-                        name='name'
-                        value={values.name}
-                        onChange={handleChange}
-                        sx={{ mt: 2 }}
-                      />
-                      <TextField
-                        fullWidth
-                        label='Header'
-                        name='header'
-                        value={values.header}
-                        onChange={handleChange}
-                        sx={{ mt: 2 }}
-                      />
-                      <TextField
-                        fullWidth
-                        label='Sub Header'
-                        name='subheader'
-                        value={values.subheader}
-                        onChange={handleChange}
-                        sx={{ mt: 2 }}
-                      />
-                      <TextField
-                        fullWidth
-                        multiline
-                        rows={4}
-                        label='Body'
-                        name='body'
-                        value={values.body}
-                        onChange={handleChange}
-                        sx={{ mt: 2 }}
-                      />
-                      <TextField
-                        fullWidth
-                        label='Footer'
-                        name='footer'
-                        value={values.footer}
-                        onChange={handleChange}
-                        sx={{ mt: 2 }}
-                      />
+                      <TextField fullWidth label='Name' name='name'
+                        value={values.name} onChange={handleChange} sx={{ mt: 2 }} />
+                      <TextField fullWidth label='Header' name='header'
+                        value={values.header} onChange={handleChange} sx={{ mt: 2 }} />
+                      <TextField fullWidth label='Sub Header' name='subheader'
+                        value={values.subheader} onChange={handleChange} sx={{ mt: 2 }} />
+                      <TextField fullWidth multiline rows={4} label='Body' name='body'
+                        value={values.body} onChange={handleChange} sx={{ mt: 2 }} />
+                      <TextField fullWidth label='Footer' name='footer'
+                        value={values.footer} onChange={handleChange} sx={{ mt: 2 }} />
 
                       <Box sx={{ mt: 3 }}>
                         <FormControlLabel
@@ -456,7 +398,74 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
                       </Box>
 
                       {/* ══════════════════════════════════════════
-                          SECTION 2 — FILE UPLOAD
+                          SECTION 2 — AD CONFIGURATION  (new)
+                      ══════════════════════════════════════════ */}
+
+                      <SectionLabel label='Ad Configuration' sx={{ mt: 4 }} />
+
+                      <Grid2 container spacing={3} sx={{ mt: 1 }}>
+
+                        {/* ad_type — free text */}
+                        <Grid2 size={{ xs: 12, sm: 6 }}>
+                          <TextField
+                            fullWidth
+                            label='Ad Type'
+                            name='ad_type'
+                            value={values.ad_type}
+                            onChange={handleChange}
+                            placeholder='e.g. sponsored, promotional, awareness'
+                            helperText='Label shown on the ad (default: sponsored)'
+                          />
+                        </Grid2>
+
+                        {/* ad_display_type — dropdown */}
+                        <Grid2 size={{ xs: 12, sm: 6 }}>
+                          <TextField
+                            select fullWidth
+                            label='Display Type'
+                            name='ad_display_type'
+                            value={values.ad_display_type}
+                            onChange={handleChange}
+                            helperText='How the ad is rendered on the client'
+                          >
+                            {AD_DISPLAY_TYPES.map(opt => (
+                              <MenuItem key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </MenuItem>
+                            ))}
+                          </TextField>
+                        </Grid2>
+
+                      </Grid2>
+
+                      {/* ══════════════════════════════════════════
+                          SECTION 3 — OFFER DETAILS  (new)
+                      ══════════════════════════════════════════ */}
+
+                      <SectionLabel label='Offer Details' sx={{ mt: 4 }} />
+
+                      <TextField
+                        fullWidth label='Offer Header' name='offer_header'
+                        value={values.offer_header} onChange={handleChange}
+                        placeholder='e.g. 50% OFF Today Only'
+                        sx={{ mt: 2 }}
+                      />
+                      <TextField
+                        fullWidth label='Offer Sub Header' name='offer_subheader'
+                        value={values.offer_subheader} onChange={handleChange}
+                        placeholder='e.g. Limited time deal'
+                        sx={{ mt: 2 }}
+                      />
+                      <TextField
+                        fullWidth multiline rows={3}
+                        label='Offer Details' name='offer_details'
+                        value={values.offer_details} onChange={handleChange}
+                        placeholder='Describe the offer, terms, or any additional info…'
+                        sx={{ mt: 2 }}
+                      />
+
+                      {/* ══════════════════════════════════════════
+                          SECTION 4 — FILE UPLOAD
                       ══════════════════════════════════════════ */}
 
                       <SectionLabel label='Upload Files' sx={{ mt: 4 }} />
@@ -464,10 +473,7 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
                       <Button variant='outlined' component='label' sx={{ mt: 2 }} disabled={uploading}>
                         {uploading ? 'Uploading…' : 'Upload Files'}
                         <input
-                          hidden
-                          type='file'
-                          multiple
-                          accept='image/*,audio/*,video/*'
+                          hidden type='file' multiple accept='image/*,audio/*,video/*'
                           onChange={e => handleFileUpload(e, values, setFieldValue)}
                         />
                       </Button>
@@ -475,23 +481,12 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
                       <Grid2 container spacing={2} sx={{ mt: 2 }}>
                         {values.files.map((file, index) => (
                           <Grid2 key={index}>
-                            <Box
-                              sx={{
-                                border: '1px solid #ddd',
-                                borderRadius: 2,
-                                p: 1,
-                                position: 'relative'
-                              }}
-                            >
+                            <Box sx={{ border: '1px solid #ddd', borderRadius: 2, p: 1, position: 'relative' }}>
                               <IconButton
-                                size='small'
-                                color='error'
+                                size='small' color='error'
                                 sx={{ position: 'absolute', top: -10, right: -10, background: '#fff' }}
                                 onClick={() =>
-                                  setFieldValue(
-                                    'files',
-                                    values.files.filter((_, i) => i !== index)
-                                  )
+                                  setFieldValue('files', values.files.filter((_, i) => i !== index))
                                 }
                               >
                                 <Icon icon='tabler:x' />
@@ -499,24 +494,15 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
 
                               {file.type === 'image' ? (
                                 <img
-                                  src={file.url}
-                                  alt='preview'
-                                  width={120}
-                                  height={120}
+                                  src={file.url} alt='preview' width={120} height={120}
                                   style={{ objectFit: 'cover', borderRadius: 8 }}
                                 />
                               ) : (
-                                <Box
-                                  sx={{
-                                    width: 120,
-                                    height: 120,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    background: '#f5f5f5',
-                                    borderRadius: 2
-                                  }}
-                                >
+                                <Box sx={{
+                                  width: 120, height: 120,
+                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                  background: '#f5f5f5', borderRadius: 2
+                                }}>
                                   <Typography variant='body2'>{file.type}</Typography>
                                 </Box>
                               )}
@@ -529,136 +515,72 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
                       </Grid2>
 
                       {/* ══════════════════════════════════════════
-                          SECTION 3 — CONTACT & SOCIAL LINKS
+                          SECTION 5 — CONTACT & SOCIAL LINKS
                       ══════════════════════════════════════════ */}
 
                       <SectionLabel label='Contact Details' sx={{ mt: 4 }} />
 
-                      <TextField
-                        fullWidth
-                        label='Contact Number'
-                        name='contact_us'
-                        value={values.contact_us}
-                        onChange={handleChange}
-                        sx={{ mt: 2 }}
-                      />
+                      <TextField fullWidth label='Contact Number' name='contact_us'
+                        value={values.contact_us} onChange={handleChange} sx={{ mt: 2 }} />
 
                       <SectionLabel label='Social Links' sx={{ mt: 4 }} />
 
                       <Grid2 container spacing={3} sx={{ mt: 1 }}>
                         {/* ── Link 1 ── */}
                         <Grid2 size={{ xs: 12, sm: 6 }}>
-                          <TextField
-                            select
-                            fullWidth
-                            label='Link Name 1'
-                            name='linkname_1'
-                            value={values.linkname_1}
-                            onChange={handleChange}
-                          >
+                          <TextField select fullWidth label='Link Name 1'
+                            name='linkname_1' value={values.linkname_1} onChange={handleChange}>
                             <MenuItem value=''>— None —</MenuItem>
-                            {socialOptions.map(item => (
-                              <MenuItem key={item} value={item}>
-                                {item}
-                              </MenuItem>
-                            ))}
+                            {socialOptions.map(item => <MenuItem key={item} value={item}>{item}</MenuItem>)}
                           </TextField>
                         </Grid2>
                         <Grid2 size={{ xs: 12, sm: 6 }}>
-                          <TextField
-                            fullWidth
-                            label='Link 1 URL'
-                            name='link_1'
-                            value={values.link_1}
-                            onChange={handleChange}
-                          />
+                          <TextField fullWidth label='Link 1 URL' name='link_1'
+                            value={values.link_1} onChange={handleChange} />
                         </Grid2>
 
                         {/* ── Link 2 ── */}
                         <Grid2 size={{ xs: 12, sm: 6 }}>
-                          <TextField
-                            select
-                            fullWidth
-                            label='Link Name 2'
-                            name='linkname_2'
-                            value={values.linkname_2}
-                            onChange={handleChange}
-                          >
+                          <TextField select fullWidth label='Link Name 2'
+                            name='linkname_2' value={values.linkname_2} onChange={handleChange}>
                             <MenuItem value=''>— None —</MenuItem>
-                            {socialOptions.map(item => (
-                              <MenuItem key={item} value={item}>
-                                {item}
-                              </MenuItem>
-                            ))}
+                            {socialOptions.map(item => <MenuItem key={item} value={item}>{item}</MenuItem>)}
                           </TextField>
                         </Grid2>
                         <Grid2 size={{ xs: 12, sm: 6 }}>
-                          <TextField
-                            fullWidth
-                            label='Link 2 URL'
-                            name='link_2'
-                            value={values.link_2}
-                            onChange={handleChange}
-                          />
+                          <TextField fullWidth label='Link 2 URL' name='link_2'
+                            value={values.link_2} onChange={handleChange} />
                         </Grid2>
 
-                        {/* ── Link 3 (new) ── */}
+                        {/* ── Link 3 ── */}
                         <Grid2 size={{ xs: 12, sm: 6 }}>
-                          <TextField
-                            select
-                            fullWidth
-                            label='Link Name 3'
-                            name='linkname_3'
-                            value={values.linkname_3}
-                            onChange={handleChange}
-                          >
+                          <TextField select fullWidth label='Link Name 3'
+                            name='linkname_3' value={values.linkname_3} onChange={handleChange}>
                             <MenuItem value=''>— None —</MenuItem>
-                            {socialOptions.map(item => (
-                              <MenuItem key={item} value={item}>
-                                {item}
-                              </MenuItem>
-                            ))}
+                            {socialOptions.map(item => <MenuItem key={item} value={item}>{item}</MenuItem>)}
                           </TextField>
                         </Grid2>
                         <Grid2 size={{ xs: 12, sm: 6 }}>
-                          <TextField
-                            fullWidth
-                            label='Link 3 URL'
-                            name='link_3'
-                            value={values.link_3}
-                            onChange={handleChange}
-                          />
+                          <TextField fullWidth label='Link 3 URL' name='link_3'
+                            value={values.link_3} onChange={handleChange} />
                         </Grid2>
                       </Grid2>
 
                       {/* ══════════════════════════════════════════
-                          SECTION 4 — TARGETING RULES
+                          SECTION 6 — TARGETING RULES
                       ══════════════════════════════════════════ */}
 
                       <Box sx={{ mt: 5 }}>
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            mb: 2
-                          }}
-                        >
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                             <Typography variant='h6'>Targeting Rules</Typography>
                             <Chip
-                              size='small'
-                              color='primary'
-                              variant='outlined'
+                              size='small' color='primary' variant='outlined'
                               label={`${values.rules.length} rule${values.rules.length !== 1 ? 's' : ''}`}
                             />
                           </Box>
-                          <Button
-                            size='small'
-                            variant='contained'
-                            startIcon={<Icon icon='tabler:plus' />}
-                            onClick={() => setFieldValue('rules', [...values.rules, { ...EMPTY_RULE }])}
-                          >
+                          <Button size='small' variant='contained' startIcon={<Icon icon='tabler:plus' />}
+                            onClick={() => setFieldValue('rules', [...values.rules, { ...EMPTY_RULE }])}>
                             Add Rule
                           </Button>
                         </Box>
@@ -669,15 +591,7 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
                         </Alert>
 
                         {values.rules.length === 0 && (
-                          <Box
-                            sx={{
-                              border: '2px dashed',
-                              borderColor: 'divider',
-                              borderRadius: 2,
-                              p: 4,
-                              textAlign: 'center'
-                            }}
-                          >
+                          <Box sx={{ border: '2px dashed', borderColor: 'divider', borderRadius: 2, p: 4, textAlign: 'center' }}>
                             <Icon icon='tabler:target-arrow' fontSize={32} />
                             <Typography variant='body2' color='text.secondary' sx={{ mt: 1 }}>
                               No targeting rules yet. Click "Add Rule" to define where this ad appears.
@@ -687,15 +601,12 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
 
                         {values.rules.map((rule, index) => (
                           <Accordion
-                            key={index}
-                            defaultExpanded={!rule.id}
+                            key={index} defaultExpanded={!rule.id}
                             sx={{
-                              mb: 2,
-                              border: '1px solid',
+                              mb: 2, border: '1px solid',
                               borderColor: rule.is_enabled ? 'primary.light' : 'divider',
                               borderRadius: '8px !important',
-                              '&:before': { display: 'none' },
-                              boxShadow: 'none'
+                              '&:before': { display: 'none' }, boxShadow: 'none'
                             }}
                           >
                             <AccordionSummary expandIcon={<Icon icon='tabler:chevron-down' />}>
@@ -707,16 +618,11 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
                                     : `Rule ${index + 1}`}
                                 </Typography>
                                 {rule.priority > 0 && (
-                                  <Chip
-                                    size='small'
-                                    variant='outlined'
-                                    color='secondary'
-                                    label={`Priority ${rule.priority}`}
-                                  />
+                                  <Chip size='small' variant='outlined' color='secondary'
+                                    label={`Priority ${rule.priority}`} />
                                 )}
                                 <Chip
-                                  size='small'
-                                  sx={{ ml: 'auto', mr: 1 }}
+                                  size='small' sx={{ ml: 'auto', mr: 1 }}
                                   color={rule.is_enabled ? 'success' : 'default'}
                                   label={rule.is_enabled ? 'Enabled' : 'Disabled'}
                                 />
@@ -731,114 +637,66 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
                               </Typography>
                               <Grid2 container spacing={3}>
                                 <Grid2 size={{ xs: 12, sm: 6 }}>
-                                  <TextField
-                                    fullWidth
-                                    required
-                                    label='Page Name'
+                                  <TextField fullWidth required label='Page Name'
                                     placeholder='e.g. home, profile, dashboard'
                                     value={rule.page_name}
-                                    onChange={e => setFieldValue(`rules[${index}].page_name`, e.target.value)}
-                                  />
+                                    onChange={e => setFieldValue(`rules[${index}].page_name`, e.target.value)} />
                                 </Grid2>
                                 <Grid2 size={{ xs: 12, sm: 6 }}>
-                                  <TextField
-                                    fullWidth
-                                    required
-                                    label='Slot Name'
+                                  <TextField fullWidth required label='Slot Name'
                                     placeholder='e.g. top_banner, mid_card, popup'
                                     value={rule.slot_name}
-                                    onChange={e => setFieldValue(`rules[${index}].slot_name`, e.target.value)}
-                                  />
+                                    onChange={e => setFieldValue(`rules[${index}].slot_name`, e.target.value)} />
                                 </Grid2>
                                 <Grid2 size={{ xs: 12, sm: 6 }}>
-                                  <TextField
-                                    fullWidth
-                                    type='number'
-                                    label='Priority'
-                                    inputProps={{ min: 0 }}
-                                    value={rule.priority}
+                                  <TextField fullWidth type='number' label='Priority'
+                                    inputProps={{ min: 0 }} value={rule.priority}
                                     onChange={e => setFieldValue(`rules[${index}].priority`, e.target.value)}
-                                    helperText='Higher = shown first when multiple ads compete'
-                                  />
+                                    helperText='Higher = shown first when multiple ads compete' />
                                 </Grid2>
                               </Grid2>
 
-                              <Typography
-                                variant='overline'
-                                color='text.secondary'
-                                display='block'
-                                sx={{ mt: 3, mb: 1.5 }}
-                              >
+                              <Typography variant='overline' color='text.secondary' display='block' sx={{ mt: 3, mb: 1.5 }}>
                                 Schedule (optional)
                               </Typography>
                               <Grid2 container spacing={3}>
                                 <Grid2 size={{ xs: 12, sm: 6 }}>
-                                  <TextField
-                                    fullWidth
-                                    label='Start At'
-                                    type='datetime-local'
+                                  <TextField fullWidth label='Start At' type='datetime-local'
                                     InputLabelProps={{ shrink: true }}
                                     value={rule.start_at ? rule.start_at.slice(0, 16) : ''}
                                     onChange={e => setFieldValue(`rules[${index}].start_at`, e.target.value || null)}
-                                    helperText='Leave empty to start immediately'
-                                  />
+                                    helperText='Leave empty to start immediately' />
                                 </Grid2>
                                 <Grid2 size={{ xs: 12, sm: 6 }}>
-                                  <TextField
-                                    fullWidth
-                                    label='End At'
-                                    type='datetime-local'
+                                  <TextField fullWidth label='End At' type='datetime-local'
                                     InputLabelProps={{ shrink: true }}
                                     value={rule.end_at ? rule.end_at.slice(0, 16) : ''}
                                     onChange={e => setFieldValue(`rules[${index}].end_at`, e.target.value || null)}
-                                    helperText='Leave empty to run indefinitely'
-                                  />
+                                    helperText='Leave empty to run indefinitely' />
                                 </Grid2>
                               </Grid2>
 
-                              <Typography
-                                variant='overline'
-                                color='text.secondary'
-                                display='block'
-                                sx={{ mt: 3, mb: 1.5 }}
-                              >
+                              <Typography variant='overline' color='text.secondary' display='block' sx={{ mt: 3, mb: 1.5 }}>
                                 Frequency Caps{' '}
-                                <Typography component='span' variant='caption'>
-                                  (0 = unlimited)
-                                </Typography>
+                                <Typography component='span' variant='caption'>(0 = unlimited)</Typography>
                               </Typography>
                               <Grid2 container spacing={3}>
                                 {[
-                                  { field: 'max_shows_per_user', label: 'Max per User', helper: 'All-time per user' },
-                                  { field: 'max_shows_per_day', label: 'Max per Day', helper: 'Resets every 24 hrs' },
-                                  {
-                                    field: 'max_shows_per_session',
-                                    label: 'Max per Session',
-                                    helper: 'Per device session'
-                                  },
-                                  {
-                                    field: 'min_interval_seconds',
-                                    label: 'Min Interval (s)',
-                                    helper: 'Cooldown between shows'
-                                  }
+                                  { field: 'max_shows_per_user',    label: 'Max per User',    helper: 'All-time per user'       },
+                                  { field: 'max_shows_per_day',     label: 'Max per Day',     helper: 'Resets every 24 hrs'     },
+                                  { field: 'max_shows_per_session', label: 'Max per Session', helper: 'Per device session'      },
+                                  { field: 'min_interval_seconds',  label: 'Min Interval (s)',helper: 'Cooldown between shows'  },
                                 ].map(({ field, label, helper }) => (
                                   <Grid2 key={field} size={{ xs: 12, sm: 6, md: 3 }}>
-                                    <TextField
-                                      fullWidth
-                                      type='number'
-                                      inputProps={{ min: 0 }}
-                                      label={label}
-                                      value={rule[field]}
+                                    <TextField fullWidth type='number' inputProps={{ min: 0 }}
+                                      label={label} value={rule[field]}
                                       onChange={e => setFieldValue(`rules[${index}].${field}`, e.target.value)}
-                                      helperText={helper}
-                                    />
+                                      helperText={helper} />
                                   </Grid2>
                                 ))}
                               </Grid2>
 
-                              <Box
-                                sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 3 }}
-                              >
+                              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 3 }}>
                                 <FormControlLabel
                                   control={
                                     <Switch
@@ -849,13 +707,9 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
                                   label={rule.is_enabled ? 'Rule enabled' : 'Rule disabled'}
                                 />
                                 <Tooltip title={rule.id ? 'Delete this rule permanently' : 'Remove'}>
-                                  <Button
-                                    size='small'
-                                    color='error'
-                                    variant='outlined'
+                                  <Button size='small' color='error' variant='outlined'
                                     startIcon={<Icon icon='tabler:trash' />}
-                                    onClick={() => handleDeleteRule(rule, index, values, setFieldValue)}
-                                  >
+                                    onClick={() => handleDeleteRule(rule, index, values, setFieldValue)}>
                                     {rule.id ? 'Delete Rule' : 'Remove'}
                                   </Button>
                                 </Tooltip>
@@ -866,8 +720,8 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
                       </Box>
 
                       {/* ══════════════════════════════════════════
-    SECTION — UI CONFIGURATION
-══════════════════════════════════════════ */}
+                          SECTION 7 — UI CONFIGURATION
+                      ══════════════════════════════════════════ */}
 
                       <SectionLabel label='UI Configuration' sx={{ mt: 4 }} />
 
@@ -877,101 +731,25 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
 
                       <Grid2 container spacing={3}>
                         {[
-                          ['text_color', 'Text Color'],
-                        //   ['body_color', 'Body Color'],
-                        //   ['footer_color', 'Footer Color'],
-                          ['button_bg_color', 'Button Background'],
-                          ['button_text_color', 'Button Text'],
-                        //   ['card_bg_color', 'Card Background'],
-                        //   ['border_color', 'Border Color']
+                          ['text_color',        'Text Color'        ],
+                          ['button_bg_color',   'Button Background' ],
+                          ['button_text_color', 'Button Text'       ],
                         ].map(([field, label]) => (
                           <Grid2 key={field} size={{ xs: 12, sm: 6, md: 4 }}>
-                            <Card
-                              variant='outlined'
-                              sx={{
-                                borderRadius: 3,
-                                overflow: 'hidden'
-                              }}
-                            >
-                              <Box
-                                sx={{
-                                  height: 70,
-                                  background: values.ui_config?.[field],
-                                  borderBottom: '1px solid #eee'
-                                }}
-                              />
-
+                            <Card variant='outlined' sx={{ borderRadius: 3, overflow: 'hidden' }}>
+                              <Box sx={{ height: 70, background: values.ui_config?.[field], borderBottom: '1px solid #eee' }} />
                               <Box sx={{ p: 2 }}>
-                                <Typography variant='subtitle2' sx={{ mb: 2 }}>
-                                  {label}
-                                </Typography>
-
+                                <Typography variant='subtitle2' sx={{ mb: 2 }}>{label}</Typography>
                                 <HexColorPicker
                                   color={values.ui_config?.[field]}
                                   onChange={color => setFieldValue(`ui_config.${field}`, color)}
-                                  style={{
-                                    width: '100%',
-                                    height: 140
-                                  }}
+                                  style={{ width: '100%', height: 140 }}
                                 />
-
                                 <TextField
-                                  fullWidth
-                                  size='small'
-                                  sx={{ mt: 2 }}
+                                  fullWidth size='small' sx={{ mt: 2 }}
                                   value={values.ui_config?.[field]}
                                   onChange={e => setFieldValue(`ui_config.${field}`, e.target.value)}
                                 />
-
-                                {/* <Box
-                                  sx={{
-                                    mt: 2,
-                                    borderRadius: 2,
-                                    overflow: 'hidden',
-                                    border: '1px solid',
-                                    borderColor: 'divider'
-                                  }}
-                                >
-                                  <Box
-                                    sx={{
-                                      p: 2,
-                                      background: values.ui_config?.card_bg_color
-                                    }}
-                                  >
-                                    <Typography
-                                      sx={{
-                                        color: values.ui_config?.title_color,
-                                        fontWeight: 700,
-                                        mb: 1
-                                      }}
-                                    >
-                                      Advertisement Preview
-                                    </Typography>
-
-                                    <Typography
-                                      sx={{
-                                        color: values.ui_config?.body_color,
-                                        mb: 2
-                                      }}
-                                    >
-                                      Dynamic advertisement UI preview
-                                    </Typography>
-
-                                    <Button
-                                      variant='contained'
-                                      sx={{
-                                        background: values.ui_config?.button_bg_color,
-                                        color: values.ui_config?.button_text_color,
-                                        borderRadius: 2,
-                                        '&:hover': {
-                                          background: values.ui_config?.button_bg_color
-                                        }
-                                      }}
-                                    >
-                                      View More
-                                    </Button>
-                                  </Box>
-                                </Box> */}
                               </Box>
                             </Card>
                           </Grid2>
@@ -990,6 +768,7 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
                           {id ? 'Update' : 'Create'}
                         </LoadingButton>
                       </Box>
+
                     </Form>
                   )}
                 </Formik>
@@ -1003,9 +782,7 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
 }
 
 const SectionLabel = ({ label, sx = {} }) => (
-  <Typography variant='h6' sx={sx}>
-    {label}
-  </Typography>
+  <Typography variant='h6' sx={sx}>{label}</Typography>
 )
 
 export default CreateAdvertisement
