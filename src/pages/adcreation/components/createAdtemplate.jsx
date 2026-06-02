@@ -306,7 +306,7 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
                     offer_subheader: RowData?.offer_subheader || '',
                     offer_details:   RowData?.offer_details   || '',
                     link_btn_text:   RowData?.link_btn_text   || null,
-                    btn_icon:        [RowData?.btn_icon ]       || [],
+                    btn_icon:        RowData?.btn_icon ? [RowData.btn_icon] : [],
 
                     // ─────────────────────────────────────────────
                     rules:           initialRules,
