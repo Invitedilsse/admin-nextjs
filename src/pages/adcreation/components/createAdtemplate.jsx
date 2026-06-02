@@ -502,14 +502,14 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
                                 <Icon icon='tabler:x' />
                               </IconButton>
 
-                              {file.type === 'image' && (
+                              {file?.type === 'image' && (
                                 <img
-                                  src={file.url} alt='preview' width={120} height={120}
+                                  src={file?.url} alt='preview' width={120} height={120}
                                   style={{ objectFit: 'cover', borderRadius: 8 }}
                                 />
                               ) }
                               <Typography variant='caption' display='block' sx={{ mt: 1 }}>
-                                {file.file_name}
+                                {file?.file_name}
                               </Typography>
                             </Box>
                           </Grid2>
