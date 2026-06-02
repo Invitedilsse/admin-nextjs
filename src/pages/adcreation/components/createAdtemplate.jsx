@@ -39,12 +39,12 @@ const EMPTY_RULE = {
 
 const DEFAULT_UI_CONFIG = {
   text_color:        '#111111',
-  body_color:        '#444444',
-  footer_color:      '#666666',
+  // body_color:        '#444444',
+  // footer_color:      '#666666',
   button_bg_color:   '#FF6B00',
   button_text_color: '#FFFFFF',
-  card_bg_color:     '#FFFFFF',
-  border_color:      '#E5E7EB'
+  // card_bg_color:     '#FFFFFF',
+  // border_color:      '#E5E7EB'
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
