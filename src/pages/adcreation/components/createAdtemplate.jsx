@@ -197,7 +197,7 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
         offer_subheader: values.offer_subheader  || null,
         offer_details:   values.offer_details    || null,
         link_btn_text:   values.link_btn_text  || null,
-        btn_icon:        [values.btn_icon]       || [],
+        btn_icon:        values.btn_icon     || [],
         // ─────────────────────────────────────────────
         ui_config:       values.ui_config,
       }
