@@ -135,7 +135,10 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
         else if (file.type.startsWith('video')) fileType = 'video'
         uploadedFiles.push({ key: data?.key, url: data?.url, type: fileType, file_name: data?.file_name })
       }
-      setFieldValue('files', [...values.files, ...uploadedFiles])
+     setFieldValue(
+        event.target.name,
+        [...(values[event.target.name] || []), ...uploadedFiles]
+      )
       toast.success('Files uploaded successfully')
     } catch (err) {
       console.error(err)
@@ -194,6 +197,7 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
         offer_subheader: values.offer_subheader  || null,
         offer_details:   values.offer_details    || null,
         link_btn_text:   values.link_btn_text  || null,
+        btn_icon:        [values.btn_icon]       || [],
         // ─────────────────────────────────────────────
         ui_config:       values.ui_config,
       }
@@ -302,6 +306,7 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
                     offer_subheader: RowData?.offer_subheader || '',
                     offer_details:   RowData?.offer_details   || '',
                     link_btn_text:   RowData?.link_btn_text   || null,
+                    btn_icon:        [RowData?.btn_icon ]       || [],
 
                     // ─────────────────────────────────────────────
                     rules:           initialRules,
@@ -474,6 +479,42 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
                         placeholder='e.g. Shop Now'
                         sx={{ mt: 2 }}
                       />
+                      <Button variant='outlined' component='label' sx={{ mt: 2 }} disabled={uploading}>
+                        {uploading ? 'Uploading…' : 'Upload Icon'}
+                        <input
+                          hidden type='file' multiple accept='image/*,audio/*,video/*'
+                          name='btn_icon'
+                          onChange={e => handleFileUpload(e, values, setFieldValue)}
+                        />
+                      </Button>
+
+                      <Grid2 container spacing={2} sx={{ mt: 2 }}>
+                        {values.btn_icon?.map((file, index) => (
+                          <Grid2 key={index}>
+                            <Box sx={{ border: '1px solid #ddd', borderRadius: 2, p: 1, position: 'relative' }}>
+                              <IconButton
+                                size='small' color='error'
+                                sx={{ position: 'absolute', top: -10, right: -10, background: '#fff' }}
+                                onClick={() =>
+                                  setFieldValue('btn_icon', values.btn_icon.filter((_, i) => i !== index))
+                                }
+                              >
+                                <Icon icon='tabler:x' />
+                              </IconButton>
+
+                              {file.type === 'image' && (
+                                <img
+                                  src={file.url} alt='preview' width={120} height={120}
+                                  style={{ objectFit: 'cover', borderRadius: 8 }}
+                                />
+                              ) }
+                              <Typography variant='caption' display='block' sx={{ mt: 1 }}>
+                                {file.file_name}
+                              </Typography>
+                            </Box>
+                          </Grid2>
+                        ))}
+                      </Grid2>
                       {/* ══════════════════════════════════════════
                           SECTION 4 — FILE UPLOAD
                       ══════════════════════════════════════════ */}
@@ -484,6 +525,7 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
                         {uploading ? 'Uploading…' : 'Upload Files'}
                         <input
                           hidden type='file' multiple accept='image/*,audio/*,video/*'
+                          name='files'
                           onChange={e => handleFileUpload(e, values, setFieldValue)}
                         />
                       </Button>
