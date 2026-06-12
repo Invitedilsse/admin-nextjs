@@ -14,6 +14,9 @@ import { apiPost, apiGet, apiDelete } from 'src/hooks/axios'
 import { baseURL } from 'src/services/pathConst'
 import ImageUpload from 'src/hooks/ImageUpload'
 import { HexColorPicker } from 'react-colorful'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import AddIcon from '@mui/icons-material/Add';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -47,6 +50,14 @@ const DEFAULT_UI_CONFIG = {
   // border_color:      '#E5E7EB'
 }
 
+const emptyNotification = () => ({
+  id: null,         // null = not yet saved
+  title: '',
+  sub_heading: '',
+  body: '',
+  banner_url: '',
+});
+
 // ═══════════════════════════════════════════════════════════════════════════════
 //  COMPONENT
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -66,11 +77,25 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
   const [cropAspectRatio, setCropAspectRatio] = useState(1 / 1)
   const [isPreview,       setIsPreview]       = useState(true)
 
+  const [notifications, setNotifications] = useState([]);
+  // const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState({}); // { [index]: bool }
+  const [deleting, setDeleting] = useState({});
+
   // ── Fetch existing rules when editing ──────────────────────────────────────
   useEffect(() => {
     if (id) fetchExistingRules()
     else    setInitialRules([])
   }, [id])
+
+    useEffect(() => {
+    if (!id) return;
+    apiGet(`${baseURL}ad/${id}/notifications`)
+      .then(res => setNotifications(res?.data?.data ?? []))
+      .catch(() => toast.error('Failed to load notifications'));
+  }, [id]);
+
+  console.log("notifications------->",notifications)
 
   const fetchExistingRules = async () => {
     setRulesLoading(true)
@@ -147,6 +172,33 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
       setUploading(false)
     }
   }
+
+    const handleFileUploadNotification = async (e, index) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      setUploading(true);
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await apiPost(`${baseURL}admin/upload-doc`, formData, true);
+      if (res?.data?.detail?.url) {
+        handleChangeNotifi(index, 'banner_url', res.data.detail.url);
+        toast.success('Banner uploaded');
+      }
+    } catch {
+      toast.error('Image upload failed');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleChangeNotifi = (index, field, value) => {
+    setNotifications(prev => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
+  };
 
   // ── Delete rule ────────────────────────────────────────────────────────────
   const handleDeleteRule = async (rule, index, values, setFieldValue) => {
@@ -238,6 +290,87 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
   }
 
   // ── Render ─────────────────────────────────────────────────────────────────
+    // ── Save (add or update) ──────────────────────────────────────────
+  const handleSave = async (index) => {
+    const notif = notifications[index];
+    if (!notif.title || !notif.body) {
+      toast.error('Title and Body are required');
+      return;
+    }
+    try {
+      setSaving(prev => ({ ...prev, [index]: true }));
+      const payload = {
+        title: notif.title,
+        sub_heading: notif.sub_heading,
+        body: notif.body,
+        banner_url: notif.banner_url,
+      };
+
+      if (notif.id) {
+        // existing — update
+        const res = await apiPut(`${baseURL}ad/notifications/${notif.id}`, payload);
+        setNotifications(prev => {
+          const updated = [...prev];
+          updated[index] = res?.data?.data;
+          return updated;
+        });
+        toast.success('Notification updated');
+      } else {
+        // new — create
+        const res = await apiPost(`${baseURL}ad/${id}/notifications`, payload);
+        setNotifications(prev => {
+          const updated = [...prev];
+          updated[index] = res?.data?.data;
+          return updated;
+        });
+        toast.success('Notification added');
+      }
+    } catch(err) {
+      console.log(err)
+      toast.error('Failed to save notification');
+    } finally {
+      setSaving(prev => ({ ...prev, [index]: false }));
+    }
+  };
+
+    const handleDispatchNotification = async (data) => {
+    const notif = data;
+    try {
+      console.log("notif------->",notif)
+      // setDeleting(prev => ({ ...prev, [index]: true }));
+      if (notif.id) {
+        apiGet(`${baseURL}ad/trigger-notifications/${notif.id}`);
+        toast.success('Notification Trigger started');
+      }
+      // setNotifications(prev => prev.filter((_, i) => i !== index));
+    } catch {
+      toast.error('Failed to trigger notification');
+    } finally {
+      // setDeleting(prev => ({ ...prev, [index]: false }));
+    }
+  };
+
+  // ── Delete ────────────────────────────────────────────────────────
+  const handleDelete = async (index) => {
+    const notif = notifications[index];
+    try {
+      setDeleting(prev => ({ ...prev, [index]: true }));
+      if (notif.id) {
+        await apiDelete(`${baseURL}ad/notifications/${notif.id}`);
+        toast.success('Notification removed');
+      }
+      setNotifications(prev => prev.filter((_, i) => i !== index));
+    } catch {
+      toast.error('Failed to delete notification');
+    } finally {
+      setDeleting(prev => ({ ...prev, [index]: false }));
+    }
+  };
+
+  // ── Add new empty row ─────────────────────────────────────────────
+  const handleAdd = () => {
+    setNotifications(prev => [...prev, emptyNotification()]);
+  };
   return (
     <Grid2 container spacing={6}>
       <Grid2 xs={12}>
@@ -770,6 +903,125 @@ const CreateAdvertisement = ({ id, RowData, toggle, fetchTable }) => {
                           </Accordion>
                         ))}
                       </Box>
+
+                       <Box sx={{ mt: 5 }}>
+      <Accordion>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center', mt: 1 }}>
+            <Typography fontWeight={600}>Notifications</Typography>
+            <Typography variant="body2" color="text.secondary">
+              {notifications.length} notification{notifications.length !== 1 ? 's' : ''}
+            </Typography>
+          </Box>
+        </AccordionSummary>
+
+        <AccordionDetails>
+          {notifications.map((notif, index) => (
+            <Accordion key={notif.id ?? `new-${index}`} sx={{ mt: 1, border: '1px solid', borderColor: 'divider' }}>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                  <Typography variant="body2" fontWeight={500}>
+                    {notif.title || `Notification ${index + 1}`}
+                    {!notif.id && (
+                      <Typography component="span" variant="caption" color="warning.main" sx={{ ml: 1 }}>
+                        (unsaved)
+                      </Typography>
+                    )}
+                  </Typography>
+                  <IconButton
+                    size="small"
+                    color="error"
+                    onClick={(e) => { e.stopPropagation(); handleDelete(index); }}
+                  >
+                    <DeleteOutlineIcon fontSize="small" />
+                  </IconButton>
+                </Box>
+              </AccordionSummary>
+
+              <AccordionDetails>
+                <TextField
+                  fullWidth sx={{ my: 1 }} label="Message Title"
+                  value={notif.title}
+                  onChange={e => handleChangeNotifi(index, 'title', e.target.value)}
+                  required
+                />
+                <TextField
+                  fullWidth sx={{ my: 1 }} label="Sub Heading"
+                  value={notif.sub_heading}
+                  onChange={e => handleChangeNotifi(index, 'sub_heading', e.target.value)}
+                />
+                <TextField
+                  fullWidth sx={{ my: 1 }} multiline rows={2} label="Body"
+                  value={notif.body}
+                  onChange={e => handleChangeNotifi(index, 'body', e.target.value)}
+                  required
+                />
+
+                {/* Banner Upload */}
+                <Box sx={{ my: 2 }}>
+                  <Typography variant="subtitle2" sx={{ mb: 1 }}>Banner Image</Typography>
+                  {notif.banner_url ? (
+                    <Box sx={{ textAlign: 'center' }}>
+                      <img src={notif.banner_url} alt="banner preview"
+                        style={{ maxWidth: '100%', borderRadius: 8, marginBottom: 8 }} />
+                      <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+                        <Button variant="outlined" component="label" disabled={uploading} size="small">
+                          Re-upload
+                          <input type="file" hidden accept="image/*" onChange={e => handleFileUploadNotification(e, index)} />
+                        </Button>
+                        <Button variant="outlined" color="error" size="small"
+                          onClick={() => handleChangeNotifi(index, 'banner_url', '')}>
+                          Remove
+                        </Button>
+                      </Box>
+                    </Box>
+                  ) : (
+                    <Button variant="contained" component="label" disabled={uploading} size="small">
+                      Upload Banner
+                      <input type="file" hidden accept="image/*" onChange={e => handleFileUploadNotification(e, index)} />
+                    </Button>
+                  )}
+                </Box>
+
+                <Divider sx={{ my: 2 }} />
+                <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                   <LoadingButton
+                  variant="contained" fullWidth
+                  // loading={saving[index]}
+                  disabled={notif.is_triggered}
+                  onClick={() => handleDispatchNotification(notif)}
+                >
+                 trigger
+                </LoadingButton>
+
+                 <LoadingButton
+                  variant="contained" fullWidth
+                  loading={saving[index]}
+                  onClick={() => handleSave(index)}
+                >
+                  {notif.id ? 'Update' : 'Save'}
+                </LoadingButton>
+
+                </Box>
+
+                
+              </AccordionDetails>
+            </Accordion>
+          ))}
+
+          {/* Add new notification */}
+          <Button
+            startIcon={<AddIcon />}
+            variant="outlined"
+            fullWidth
+            sx={{ mt: 2 }}
+            onClick={handleAdd}
+          >
+            Add Notification
+          </Button>
+        </AccordionDetails>
+      </Accordion>
+    </Box>
 
                       {/* ══════════════════════════════════════════
                           SECTION 7 — UI CONFIGURATION
