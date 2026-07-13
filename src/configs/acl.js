@@ -21,6 +21,7 @@ const defineRulesFor = (role, subject) => {
     can('manage','userfamily')
     can('manage','campaign')
     can('manage','adcreation')
+    can('manage','ocrmanage')
     
 
 
@@ -36,6 +37,8 @@ const defineRulesFor = (role, subject) => {
     accessible.subject = 'assigntasks'
     accessible.action = 'manage'
     accessible.subject = 'mapmanage'
+     accessible.action = 'manage'
+    accessible.subject = 'ocrmanage'
     accessible.action = 'manage'
     accessible.subject = 'functionreports'
      accessible.action = 'manage'
@@ -58,6 +61,8 @@ const defineRulesFor = (role, subject) => {
     can('manage','userfamily')
     can('manage','campaign')
      can('manage','adcreation')
+    can('manage','ocrmanage')
+
 
     accessible.action = 'campaign'
     accessible.action = 'manage'
@@ -71,6 +76,8 @@ const defineRulesFor = (role, subject) => {
     accessible.action = 'manage'
     accessible.action = 'manage'
     accessible.subject = 'mapmanage'
+    accessible.action = 'manage'
+    accessible.subject = 'ocrmanage'
     accessible.subject = 'assigntasks'
     accessible.action = 'manage'
     accessible.subject = 'functionreports'

@@ -19,10 +19,17 @@ import {
 } from '@mui/material'
 
 import { makeStyles } from '@mui/styles'
-import ListMap from './Components/listusers'
-import ListEvent from './Components/listevents'
-import ListOccasion from './Components/listoccasion'
-import OfflinePageBannersPage from './Components/offlineBannerImg'
+import OcrEventTypesPage from './Components/OcrEventTypesPage'
+import OcrKeywordsPage from './Components/OcrKeywordsPage'
+import OcrLabPage from './Components/OcrLabPage'
+import OcrLeaderboardPage from './Components/OcrLeaderboardPage'
+import OcrMainPromptPage from './Components/OcrMainPromptPage'
+import OcrNewVenuesPage from './Components/OcrNewVenuesPage'
+import OcrQuotaPage from './Components/OcrQuotaPage'
+import OcrRawDataPage from './Components/OcrRawDataPage'
+import OcrSettingsPage from './Components/OcrSettingsPage'
+import OcrTypeMatchesPage from './Components/OcrTypeMatchesPage'
+import OcrUsagePage from './Components/OcrUsagePage'
 
 const useStyles = makeStyles({
   root: {}
@@ -100,40 +107,81 @@ const AdminPanel = props => {
                 scrollButtons='auto'
                 aria-label='scrollable auto tabs example'
               >
-                <Tab label='Add Offline Map' value={1} />
-                <Tab label='Add Offline Occasion' value={2} />
+                <Tab label='OCR event types' value={1} />
+                <Tab label='OCR Key Words' value={2} />
 
-                <Tab label='Add Offline Event' value={3} />
-                <Tab label='Add Offline Page Banner' value={4} />
+                {/* <Tab label='ocr lab page' value={3} /> */}
+                <Tab label='Ocr LeaderBoard' value={4} />
+                <Tab label='Ocr main Prompt' value={5} />
+                <Tab label='ocr new venue' value={6} />
+                <Tab label='ocr quota' value={7} />
+                <Tab label='ocr raw data' value={8} />
+                <Tab label='ocr setting' value={9} />
+                <Tab label='ocr type matches' value={10} />
+                <Tab label='ocr usage' value={11} />
 
               </Tabs>
             </Box>
 
             <TabPanel value={1}>
               <Fragment>
-                <ListMap />
+                <OcrEventTypesPage />
               </Fragment>
             </TabPanel>
-              <TabPanel value={3}>
+            <TabPanel value={2}>
               <Fragment>
-                <ListEvent />
+                <OcrKeywordsPage />
               </Fragment>
             </TabPanel>
-
-             <TabPanel value={2}>
+            {/* <TabPanel value={3}>
               <Fragment>
-                <ListOccasion />
+                <OcrLabPage />
               </Fragment>
-            </TabPanel>
+            </TabPanel> */}
 
             <TabPanel value={4}>
               <Fragment>
-                <OfflinePageBannersPage />
+                <OcrLeaderboardPage />
               </Fragment>
             </TabPanel>
- 
-            
-            
+
+            <TabPanel value={5}>
+              <Fragment>
+                <OcrMainPromptPage />
+              </Fragment>
+            </TabPanel>
+
+            <TabPanel value={6}>
+              <Fragment>
+                <OcrNewVenuesPage />
+              </Fragment>
+            </TabPanel>
+
+            <TabPanel value={7}>
+              <Fragment>
+                <OcrQuotaPage />
+              </Fragment>
+            </TabPanel>
+            <TabPanel value={8}>
+              <Fragment>
+                <OcrRawDataPage />
+              </Fragment>
+            </TabPanel>
+            <TabPanel value={9}>
+              <Fragment>
+                <OcrSettingsPage />
+              </Fragment>
+            </TabPanel>
+            <TabPanel value={10}>
+              <Fragment>
+                <OcrTypeMatchesPage />
+              </Fragment>
+            </TabPanel>
+            <TabPanel value={11}>
+              <Fragment>
+                <OcrUsagePage />
+              </Fragment>
+            </TabPanel>
           </TabContext>
         </Box>
       </Card>

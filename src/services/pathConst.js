@@ -180,3 +180,23 @@ export const deleteEventListUrl = `${baseURL}map-management/delete-event`
 export const occasionListUrl = `${baseURL}map-management/list-occasion`
 export const deleteOccasionListUrl = `${baseURL}map-management/delete-occasion`
 
+
+export const ocrUsageLogsUrl = `${baseURL}ocr-management/usage-logs`
+export const ocrUserQuotaListUrl = `${baseURL}ocr-management/user-quota-list`
+export const ocrUserQuotaUrl = userId => `${baseURL}ocr-management/user-quota/${userId}`
+export const ocrModelConfigUrl = `${baseURL}ocr-management/model-config`
+export const ocrRawPageSettingUrl = `${baseURL}ocr-management/raw-page-setting`
+export const ocrRawPageDataUrl = `${baseURL}ocr-management/raw-page-data`
+export const ocrCompressSettingUrl = `${baseURL}ocr-management/compress-setting`
+export const ocrFuzzyThresholdUrl = `${baseURL}ocr-management/fuzzy-threshold`
+export const ocrKeywordsUrl = `${baseURL}ocr-management/keywords`
+export const ocrEventTypesUrl = `${baseURL}ocr-management/event-types`
+export const ocrTypeMatchesUrl = `${baseURL}ocr-management/type-matches`
+export const ocrNewVenuesUrl = `${baseURL}ocr-management/new-venues`
+export const ocrNewVenuesExportUrl = `${baseURL}ocr-management/new-venues/export`
+export const ocrUploadUrl = `${baseURL}ocr-management/upload`
+export const ocrPdfPreviewUrl = `${baseURL}ocr-management/pdf-preview`
+export const ocrProcessSessionUrl = `${baseURL}ocr-management/process-session`
+export const ocrReviewUrl = `${baseURL}ocr-management/review`
+export const ocrLeaderboardUrl = `${baseURL}ocr-management/leaderboard`
+export const ocrMainPromptUrl = `${baseURL}ocr-management/ocr-promt-api`

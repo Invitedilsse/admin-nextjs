@@ -50,11 +50,18 @@ const navigation = () => {
     subject: 'usermanage'
   },
   {
-    title: 'Map Management',
+    title: 'Offline Management',
     path: '/map-management',
     icon: 'ri:map-pin-fill',
     action: 'read',
     subject: 'mapmanage'
+  },
+    {
+    title: 'OCR Management',
+    path: '/ocr-management',
+    icon: 'ri:map-pin-fill',
+    action: 'read',
+    subject: 'ocrmanage'
   },
   {
     title: 'Manage Functions',
