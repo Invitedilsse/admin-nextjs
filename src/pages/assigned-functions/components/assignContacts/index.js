@@ -134,10 +134,11 @@ function ListContactsCallers({RowData}) {
             {
       accessorKey: 'Create Message Record',
       header: 'Create Message Record',
-      Cell: ({ row }) => (
+      Cell: ({ row }) => {
         // <Button variant='contained'  onClick={() => onTemplateClick(row.original)}>
         // <Button variant='contained'>Trigger Message</Button>
-        <LoadingButton
+        console.log("Create Message Record---->",row.original?.id)
+        return (<LoadingButton
           variant='contained'
           color='primary'
           // fullWidth
@@ -152,7 +153,8 @@ function ListContactsCallers({RowData}) {
         >
           Create Message Record
         </LoadingButton>
-      )
+        )
+      }
       // </Button>
     },
     {

@@ -90,6 +90,13 @@ const navigation = () => {
       icon: 'maki:calendar',
       action: 'read',
       subject: 'adcreation'
+    },
+     {
+      title: 'Webiste Redirect',
+      path: '/website-redirect',
+      icon: 'maki:link',
+      action: 'read',
+      subject: 'websiteredirect'
     }
 ]
 }
