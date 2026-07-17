@@ -34,13 +34,13 @@ import toast from 'react-hot-toast'
 // NOTE: adjust these to match your actual `social_link` enum values in postgres.
 const SOCIAL_LINK_OPTIONS = ['facebook', 'instagram', 'twitter', 'linkedin', 'youtube', 'whatsapp', 'website']
 
-// converts an ISO / timestamp string into the format <input type="datetime-local" /> expects
-const toLocalInput = value => {
+// converts an ISO / timestamp string into the format <input type="date" /> expects
+const toDateInputValue = value => {
   if (!value) return ''
   const d = new Date(value)
   if (isNaN(d.getTime())) return ''
   const pad = n => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
 
 const validationSchema = yup.object({
@@ -86,8 +86,8 @@ const WebsiteRedirectFormDialog = props => {
           is_active: values.is_active,
           linkname_1: values.linkname_1 || null,
           link_1: values.link_1 || null,
-          active_from: values.active_from ? new Date(values.active_from).toISOString() : null,
-          active_till: values.active_till ? new Date(values.active_till).toISOString() : null
+          active_from: values.active_from ? new Date(`${values.active_from}T00:00:00`).toISOString() : null,
+          active_till: values.active_till ? new Date(`${values.active_till}T23:59:00`).toISOString() : null
         }
 
         // Single upsert endpoint — backend decides insert vs update based on `id`.
@@ -122,8 +122,8 @@ const WebsiteRedirectFormDialog = props => {
           is_active: RowData?.is_active ?? true,
           linkname_1: RowData?.linkname_1 || '',
           link_1: RowData?.link_1 || '',
-          active_from: toLocalInput(RowData?.active_from),
-          active_till: toLocalInput(RowData?.active_till)
+          active_from: toDateInputValue(RowData?.active_from),
+          active_till: toDateInputValue(RowData?.active_till)
         })
       } else {
         formik.resetForm()
@@ -264,28 +264,28 @@ const WebsiteRedirectFormDialog = props => {
           <Grid2 size={{ xs: 12, sm: 6 }}>
             <TextField
               label='Active From'
-              type='datetime-local'
+              type='date'
               fullWidth
               name='active_from'
               InputLabelProps={{ shrink: true }}
               value={formik.values.active_from}
               onChange={formik.handleChange}
               error={formik.touched.active_from && Boolean(formik.errors.active_from)}
-              helperText={formik.touched.active_from && formik.errors.active_from}
+              helperText={(formik.touched.active_from && formik.errors.active_from) || 'Starts at 00:00'}
             />
           </Grid2>
 
           <Grid2 size={{ xs: 12, sm: 6 }}>
             <TextField
               label='Active Till'
-              type='datetime-local'
+              type='date'
               fullWidth
               name='active_till'
               InputLabelProps={{ shrink: true }}
               value={formik.values.active_till}
               onChange={formik.handleChange}
               error={formik.touched.active_till && Boolean(formik.errors.active_till)}
-              helperText={formik.touched.active_till && formik.errors.active_till}
+              helperText={(formik.touched.active_till && formik.errors.active_till) || 'Ends at 23:59'}
             />
           </Grid2>
 
