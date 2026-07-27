@@ -97,6 +97,13 @@ const navigation = () => {
       icon: 'maki:link',
       action: 'read',
       subject: 'websiteredirect'
+    },
+    {
+      title: 'Reminder',
+      path: '/reminder-management',
+      icon: 'mdi:bell-ring-outline',
+      action: 'read',
+      subject: 'remindermanage'
     }
 ]
 }

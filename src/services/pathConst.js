@@ -23,6 +23,16 @@ export const reportFunctionDetailsById = `${baseURL}function-reports/function-de
 export const reportEventDetailsById = `${baseURL}function-reports/event-detail`
 export const reportOffFunInfoID = `${baseURL}function-reports/offline-event-detail`
 
+// Family Reminders (super-admin reporting)
+export const reminderSummaryUrl = `${baseURL}reminder-management/summary`
+export const reminderListUrl = `${baseURL}reminder-management/list`
+export const reminderDetailUrl = `${baseURL}reminder-management/details`
+export const reminderUserListUrl = `${baseURL}reminder-management/users`
+export const reminderUserDetailUrl = `${baseURL}reminder-management/user`
+export const reminderCreateUrl = `${baseURL}reminder-management/create`
+export const reminderExportUrl = `${baseURL}reminder-management/export`
+export const reminderAppUsersUrl = `${baseURL}reminder-management/app-users`
+
 
 
 

@@ -36,6 +36,7 @@ import { useRouter } from "next/router";
 
 const Home = () => {
   const [dashboardData, setDashboardData] = useState({});
+  const [reminderCount, setReminderCount] = useState(0);
   const [anchorEl, setAnchorEl] = useState(null);
   const[filType,setFiltype] = useState("today")
   const[dateRange,setDateRange] = useState({
@@ -50,14 +51,25 @@ const Home = () => {
       const router = useRouter()
 
   const fetchDashboard = async (start_date, end_date) => {
+    const params = `start_date=${start_date}&end_date=${end_date}`;
+
     try {
-      const params = `start_date=${start_date}&end_date=${end_date}`;
       // const res = await apiGet(`/dashboard-details?${params}`);
       const res = await apiGet(`${baseURL}function-reports/dashboard-report?${params}`);
       setDashboardData(res?.data || {});
       setAnchorEl(null)
     } catch (err) {
       console.error("Dashboard API Error:", err);
+    }
+
+    // Reminder count lives in its own module. Kept in a separate try so a
+    // failure here can never blank out the existing dashboard cards.
+    try {
+      const reminderRes = await apiGet(`${baseURL}reminder-management/summary?${params}`);
+      setReminderCount(reminderRes?.data?.detail?.total_reminders || 0);
+    } catch (err) {
+      console.error("Reminder summary API Error:", err);
+      setReminderCount(0);
     }
   };
 
@@ -127,6 +139,13 @@ const Home = () => {
       value: dashboardData?.familyconnection_count || 0,
       color: "#9c27b0",
       route: '/user-family'
+
+    },
+    {
+      title: "Reminders",
+      value: reminderCount,
+      color: "#f2a429",
+      route: '/reminder-management'
 
     }
   ];
