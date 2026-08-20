@@ -15,6 +15,8 @@ import { MaterialReactTable, useMaterialReactTable } from 'material-react-table'
 
 import { apiGet, apiPut } from 'src/hooks/axios'
 import { ocrUserQuotaListUrl, ocrUserQuotaUrl } from 'src/services/pathConst'
+import { Card, Grid2 } from '@mui/material'
+import { HexColorPicker } from 'react-colorful'
 
 const OcrQuotaPage = () => {
   const { userData } = useSelector(state => state.auth)
@@ -26,9 +28,10 @@ const OcrQuotaPage = () => {
   // Dialog state
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState(null)
-  const [addCount, setAddCount] = useState('5')
+  const [addCount, setAddCount] = useState('0')
+  const [customPlanName, setCustomPlanName] = useState('')
   const [saving, setSaving] = useState(false)
-
+  const [customBackgroundColor,setCustomBackgroundColor] = useState('#FF9F43')
   // useEffect(() => {
   //   if (userData?.userrole_type !== 'super-admin') router.push('/home')
   // }, [userData])
@@ -49,7 +52,9 @@ const OcrQuotaPage = () => {
 
   const openDialog = (user) => {
     setSelectedUser(user)
-    setAddCount('5')
+    setCustomPlanName(user.custom_plan)
+    setCustomBackgroundColor(user.custom_color)
+    setAddCount('0')
     setDialogOpen(true)
   }
 
@@ -57,7 +62,7 @@ const OcrQuotaPage = () => {
     if (!selectedUser) return
     setSaving(true)
     try {
-      await apiPut(ocrUserQuotaUrl(selectedUser.id), { addAttempts: parseInt(addCount) })
+      await apiPut(ocrUserQuotaUrl(selectedUser.id), { addAttempts: parseInt(addCount),custom_plan:customPlanName,custom_color:customBackgroundColor })
       setDialogOpen(false)
       fetchData()
     } catch (e) {
@@ -116,6 +121,11 @@ const OcrQuotaPage = () => {
       accessorKey: 'attempts_allowed',
       header: 'Allowed',
       Cell: ({ row }) => row.original.attempts_allowed
+    },
+     {
+      accessorKey: 'custom_plan',
+      header: 'Custom Plan Name',
+      Cell: ({ row }) => row.original.custom_plan
     },
     {
       accessorKey: 'quota_updated_at',
@@ -198,6 +208,34 @@ const OcrQuotaPage = () => {
             fullWidth
             size='small'
           />
+           <TextField
+            label='Custom Plan Name'
+            type='text'
+            value={customPlanName}
+            onChange={e => setCustomPlanName(e.target.value)}
+            inputProps={{ min: 1, max: 100 }}
+            fullWidth
+            size='small'
+            className='m-2'
+          />
+           <Grid2  size={{ xs: 12, sm: 6, md: 4 }}>
+                            <Card variant='outlined' sx={{ borderRadius: 3, overflow: 'hidden' }}>
+                              <Box sx={{ height: 70, background: customBackgroundColor, borderBottom: '1px solid #eee' }} />
+                              <Box sx={{ p: 2 }}>
+                                <Typography variant='subtitle2' sx={{ mb: 2 }}>Select Background color</Typography>
+                                <HexColorPicker
+                                  color={customBackgroundColor}
+                                  onChange={color => setCustomBackgroundColor(color)}
+                                  style={{ width: '100%', height: 140 }}
+                                />
+                                <TextField
+                                  fullWidth size='small' sx={{ mt: 2 }}
+                                  value={customBackgroundColor}
+                                  onChange={e => setCustomBackgroundColor(e.target.value)}
+                                />
+                              </Box>
+                            </Card>
+                          </Grid2>
           <Typography variant='caption' color='text.secondary' mt={1} display='block'>
             New total allowed: {(selectedUser?.attempts_allowed || 0) + parseInt(addCount || 0)}
           </Typography>
