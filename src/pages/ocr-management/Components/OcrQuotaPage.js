@@ -29,7 +29,7 @@ const OcrQuotaPage = () => {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState(null)
   const [addCount, setAddCount] = useState('0')
-  const [customPlanName, setCustomPlanName] = useState('')
+  const [customPlanName, setCustomPlanName] = useState('PRO • Free now')
   const [saving, setSaving] = useState(false)
   const [customBackgroundColor,setCustomBackgroundColor] = useState('#FF9F43')
   // useEffect(() => {
