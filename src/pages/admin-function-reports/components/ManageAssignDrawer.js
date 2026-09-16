@@ -17,6 +17,7 @@ import { apiGet } from 'src/hooks/axios'
 import FunctionList from './functionList'
 import FunctionDetailsById from './functionDetailsById'
 import OfflineFunctionDetailsById from './offlineFunctionDet'
+import FunctionConversations from './functionConversations'
 // import AssignContacts from './assignContacts'
 // import WaCallertriggerTemplateList from './createMessageTemplate'
 // import ListAssignedCallers from './viewReports'
@@ -173,14 +174,26 @@ const FunctionDetailsDrawer = props => {
             aria-label='scrollable auto tabs example'
           >
             <Tab label='Function List' value={1} />
+            {/* Every family chat that hangs off this invitation — one thread per
+                invitee, each with its own main member, family and transcript. */}
+            <Tab label='Conversations' value={2} />
           </Tabs>
         </Box>
         <TabPanel value={1}>
           <Fragment>
-             {functionRowData&&functionRowData.function === "online" && <FunctionDetailsById RowData={functionRowData} functionDetails={functionDetails} setfunctionDetails={setfunctionDetails}  handleCloseFunctionDetails={handleCloseFunctionDetails} 
-                    />} 
-             {functionRowData&&functionRowData.function === "offline" && <OfflineFunctionDetailsById RowData={functionRowData} setfunctionDetails={setfunctionDetails}  handleCloseFunctionDetails={handleCloseFunctionDetails} />} 
+             {functionRowData&&functionRowData.function === "online" && <FunctionDetailsById RowData={functionRowData} functionDetails={functionDetails} setfunctionDetails={setfunctionDetails}  handleCloseFunctionDetails={handleCloseFunctionDetails}
+                    />}
+             {functionRowData&&functionRowData.function === "offline" && <OfflineFunctionDetailsById RowData={functionRowData} setfunctionDetails={setfunctionDetails}  handleCloseFunctionDetails={handleCloseFunctionDetails} />}
 
+          </Fragment>
+        </TabPanel>
+        <TabPanel value={2}>
+          <Fragment>
+            {/* Works for both scopes: the panel passes the row's own
+                online/offline flag through to the API. */}
+            {functionRowData && (
+              <FunctionConversations RowData={functionRowData} functionDetails={functionDetails} />
+            )}
           </Fragment>
         </TabPanel>
       </TabContext>

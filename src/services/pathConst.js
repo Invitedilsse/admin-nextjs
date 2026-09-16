@@ -22,6 +22,14 @@ export const reportFunctionListByUser = `${baseURL}function-reports/function-lis
 export const reportFunctionDetailsById = `${baseURL}function-reports/function-detail`
 export const reportEventDetailsById = `${baseURL}function-reports/event-detail`
 export const reportOffFunInfoID = `${baseURL}function-reports/offline-event-detail`
+// Every guest one app user has saved — the Contact List tab on their history
+// page. Same rows and counts their phone shows under My Guests.
+export const reportUserContacts = `${baseURL}function-reports/user-contacts`
+
+// One guest's invites both ways, with the covers and gifts recorded against
+// each — the block the app shows on a guest's page. Fetched when a row in that
+// list is expanded, not with the list.
+export const reportUserContactInvites = `${baseURL}function-reports/user-contact-invites`
 
 // Family Reminders (super-admin reporting)
 export const reminderSummaryUrl = `${baseURL}reminder-management/summary`
