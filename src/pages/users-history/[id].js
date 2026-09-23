@@ -10,10 +10,13 @@ import {
   Grid2,
   Tabs,
   Tab,
-  CircularProgress
+  CircularProgress,
+  TextField,
+  Button
 } from "@mui/material";
 import { useRouter } from "next/router";
-import { apiGet } from "src/hooks/axios";
+import { apiGet, apiPatch } from "src/hooks/axios";
+import toast from "react-hot-toast";
 import { baseURL } from "src/services/pathConst";
 import ContactsTabs from "./components/FamilContactDisplay";
 import UserContactList from "./components/UserContactList";
@@ -26,6 +29,12 @@ const FunctionReportView = ({ }) => {
   const [user,setUser]=useState({});
   const [eventsmapped,seteventsmapped] = useState([])
   const [familyContact,setfamilyContact] = useState({})
+
+  // How many family members this user may add. The value saved here is the
+  // new TOTAL, not an addition to the default 15: 20 means 20 members.
+  const [familyLimit,setFamilyLimit] = useState(null)
+  const [familyLimitInput,setFamilyLimitInput] = useState('')
+  const [savingFamilyLimit,setSavingFamilyLimit] = useState(false)
 
   const[isdataloading,setisdataloading]=useState(false)
    const [pagination, setPagination] = useState({
@@ -53,6 +62,10 @@ const FunctionReportView = ({ }) => {
           setUser(response.data.data.userDetail?.[0] || {})
           seteventsmapped(response.data.data.mappedEvents || [])
           setfamilyContact(response.data.data.familyList || {})
+
+          const limitInfo = response.data.data.familyLimit || null
+          setFamilyLimit(limitInfo)
+          setFamilyLimitInput(limitInfo?.limit != null ? String(limitInfo.limit) : '')
         } catch (error) {
           console.error('UserList:------>', error)
         } finally {
@@ -79,6 +92,34 @@ const FunctionReportView = ({ }) => {
           setLoadingoff(false)
         }
       }
+  const saveFamilyLimit = async () => {
+    const value = Number(familyLimitInput)
+    if (!Number.isInteger(value) || value < 1 || value > 500) {
+      toast.error('Enter a whole number between 1 and 500')
+
+      return
+    }
+
+    setSavingFamilyLimit(true)
+    try {
+      const response = await apiPatch(`${baseURL}function-reports/user-family-limit`, {
+        userId: id,
+        limit: value
+      })
+      const updated = response?.data?.data || null
+      if (updated) {
+        setFamilyLimit(updated)
+        setFamilyLimitInput(String(updated.limit))
+      }
+      toast.success(response?.data?.message || 'Family member limit updated')
+    } catch (error) {
+      console.error('Family limit:------>', error)
+      toast.error(error?.response?.data?.message || error?.message || 'Could not update the limit')
+    } finally {
+      setSavingFamilyLimit(false)
+    }
+  }
+
 useEffect(()=>{
     if(id){
      fetchuserData()
@@ -113,6 +154,51 @@ console.log(user,eventsmapped)
             <Typography>
               <strong>Role:</strong> {user?.role}
             </Typography>
+          </Stack>
+
+          <Divider sx={{ my: 2 }} />
+
+          {/* Family member allowance. Everyone gets 15; raise it here for one
+              user. The number is the new total — 20 means this user can add
+              20 members, not 15 + 20. */}
+          <Typography variant="subtitle1" fontWeight={600}>
+            Family Members Allowed
+          </Typography>
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={2}
+            alignItems={{ sm: 'center' }}
+            mt={1}
+          >
+            <TextField
+              size="small"
+              type="number"
+              label="Members allowed"
+              value={familyLimitInput}
+              onChange={e => setFamilyLimitInput(e.target.value)}
+              inputProps={{ min: 1, max: 500, step: 1 }}
+              sx={{ width: 180 }}
+              helperText={`Total, not extra. Default ${familyLimit?.default ?? 15}.`}
+            />
+            <Button
+              variant="contained"
+              onClick={saveFamilyLimit}
+              disabled={
+                savingFamilyLimit ||
+                !familyLimitInput ||
+                String(familyLimit?.limit ?? '') === String(familyLimitInput)
+              }
+            >
+              {savingFamilyLimit ? 'Saving…' : 'Save'}
+            </Button>
+            {familyLimit && (
+              <Chip
+                size="small"
+                variant="outlined"
+                color={familyLimit.remaining > 0 ? 'success' : 'warning'}
+                label={`${familyLimit.used} of ${familyLimit.limit} used`}
+              />
+            )}
           </Stack>
         </CardContent>
       </Card>

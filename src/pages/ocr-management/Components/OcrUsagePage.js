@@ -11,6 +11,9 @@ import { MaterialReactTable, useMaterialReactTable } from 'material-react-table'
 import TextField from '@mui/material/TextField'
 import Stack from '@mui/material/Stack'
 import Button from '@mui/material/Button'
+import MenuItem from '@mui/material/MenuItem'
+import Tooltip from '@mui/material/Tooltip'
+import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 
 import { apiGet } from 'src/hooks/axios'
 import { ocrUsageLogsUrl } from 'src/services/pathConst'
@@ -22,6 +25,87 @@ import { Grid2 } from '@mui/material'
 
 const fmt = (n, decimals = 0) =>
   n == null ? '-' : Number(n).toLocaleString('en-IN', { maximumFractionDigits: decimals })
+
+// What the result filter offers. 'unknown' covers rows logged before uploads
+// were tracked — they are neither empty nor not, they are simply unrecorded,
+// and folding them into either bucket would misstate the numbers.
+const RESULT_OPTIONS = [
+  { value: '', label: 'All results' },
+  { value: 'empty', label: 'Empty (0 events)' },
+  { value: 'with_events', label: 'With events' },
+  { value: 'unknown', label: 'Not recorded (older)' }
+]
+
+const EMPTY_FILTERS = { mobile: '', fromDate: '', toDate: '', fromMonth: '', toMonth: '', resultFilter: '' }
+
+/**
+ * Events chip: red for an empty upload, green with a count, grey when unknown.
+ *
+ * Rows logged before results were recorded are classified from the stored AI
+ * output instead. Those carry a "~" and say so on hover — per page rather than
+ * per upload, so close but not the same claim as a recorded result.
+ */
+const EventsChip = ({ log }) => {
+  const estimated = log.result_source === 'derived'
+  const wrap = chip => estimated
+    ? <Tooltip title='Estimated from the stored AI output — logged before results were recorded'>{chip}</Tooltip>
+    : chip
+
+  if (log.is_empty === true) {
+    return wrap(<Chip label={`${estimated ? '~' : ''}0 events`} size='small' color='error'
+      variant={estimated ? 'outlined' : 'filled'} sx={{ fontSize: 10, fontWeight: 700 }} />)
+  }
+  if (log.is_empty === false) {
+    const n = Number(log.event_count || 0)
+    return wrap(<Chip label={`${estimated ? '~' : ''}${n} event${n === 1 ? '' : 's'}`} size='small'
+      color='success' variant='outlined' sx={{ fontSize: 10 }} />)
+  }
+  return (
+    <Tooltip title='Logged before results were recorded'>
+      <Chip label='—' size='small' variant='outlined' sx={{ fontSize: 10, color: 'text.disabled' }} />
+    </Tooltip>
+  )
+}
+
+/** The user's original upload, inline when it is an image. */
+const SourceFilePreview = ({ log }) => {
+  if (!log.has_source_file) {
+    return (
+      <Typography variant='caption' color='text.disabled' display='block' mb={1}>
+        Original file not stored for this entry.
+      </Typography>
+    )
+  }
+  if (!log.source_file_link) {
+    return (
+      <Typography variant='caption' color='warning.main' display='block' mb={1}>
+        File is stored, but this server cannot create a link to it — check AWS credentials on the admin backend.
+      </Typography>
+    )
+  }
+  const isImage = String(log.source_file_type || '').startsWith('image/')
+  return (
+    <Box sx={{ mb: 2 }}>
+      <Typography variant='caption' fontWeight={700} color='text.secondary' display='block' mb={0.5}>
+        UPLOADED FILE{log.source_file_name ? ` — ${log.source_file_name}` : ''}
+      </Typography>
+      {isImage ? (
+        <a href={log.source_file_link} target='_blank' rel='noopener noreferrer'>
+          <Box component='img' src={log.source_file_link} alt='Uploaded invitation'
+            sx={{ maxWidth: '100%', maxHeight: 360, borderRadius: 1, border: '1px solid #eee', display: 'block' }} />
+        </a>
+      ) : (
+        <Button size='small' variant='outlined' endIcon={<OpenInNewIcon fontSize='small' />}
+          href={log.source_file_link} target='_blank' rel='noopener noreferrer'>
+          Open {String(log.source_file_type || '').includes('pdf') ? 'PDF' : 'file'}
+        </Button>
+      )}
+      <Typography variant='caption' color='text.disabled' display='block' mt={0.5}>
+        Link expires after 15 minutes — reload the page for a fresh one.
+      </Typography>
+    </Box>
+  )
+}
 
 const SummaryCard = ({ label, value, sub, color = 'text.primary' }) => (
   <Card variant='outlined' sx={{ height: '100%' }}>
@@ -94,7 +178,7 @@ const OcrUsagePage = () => {
   const [total, setTotal] = useState(0)
   const [dataLoading, setDataLoading] = useState(false)
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 25 })
-  const [filters, setFilters] = useState({ mobile: '', fromDate: '', toDate: '', fromMonth: '', toMonth: '' })
+  const [filters, setFilters] = useState(EMPTY_FILTERS)
   const [mobileInput, setMobileInput] = useState('')
 
   const fetchData = async () => {
@@ -108,6 +192,7 @@ const OcrUsagePage = () => {
         ...(filters.toDate && { toDate: filters.toDate }),
         ...(filters.fromMonth && { fromMonth: filters.fromMonth }),
         ...(filters.toMonth && { toMonth: filters.toMonth }),
+        ...(filters.resultFilter && { resultFilter: filters.resultFilter }),
       })
       const response = await apiGet(`${ocrUsageLogsUrl}?${params.toString()}`)
       setLogs(response.data?.data || [])
@@ -122,7 +207,7 @@ const OcrUsagePage = () => {
 
   useEffect(() => { fetchData() }, [
     pagination.pageIndex, pagination.pageSize,
-    filters.mobile, filters.fromDate, filters.toDate, filters.fromMonth, filters.toMonth
+    filters.mobile, filters.fromDate, filters.toDate, filters.fromMonth, filters.toMonth, filters.resultFilter
   ])
 
   useEffect(() => {
@@ -146,6 +231,14 @@ const OcrUsagePage = () => {
     { accessorKey: 'request_count', header: 'Pages', size: 80,
       muiTableHeadCellProps: { align: 'right' }, muiTableBodyCellProps: { align: 'right' },
       Cell: ({ row }) => fmt(row.original.request_count) },
+    { accessorKey: 'empty_uploads', header: 'Empty', size: 70,
+      muiTableHeadCellProps: { align: 'right' }, muiTableBodyCellProps: { align: 'right' },
+      Cell: ({ row }) => (
+        <Typography variant='body2' fontWeight={row.original.empty_uploads > 0 ? 700 : 400}
+          color={row.original.empty_uploads > 0 ? 'error.main' : 'text.disabled'}>
+          {fmt(row.original.empty_uploads)}
+        </Typography>
+      ) },
     { accessorKey: 'prompt_tokens', header: 'Prompt', size: 80,
       muiTableHeadCellProps: { align: 'right' }, muiTableBodyCellProps: { align: 'right' },
       Cell: ({ row }) => fmt(row.original.prompt_tokens) },
@@ -179,18 +272,38 @@ const OcrUsagePage = () => {
           <Accordion key={log.id} disableGutters variant='outlined' sx={{ mb: 1 }}>
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
               <Grid container spacing={1} alignItems='center' sx={{ width: '100%' }}>
-                <Grid item xs={12} sm={3}><Typography variant='body2' noWrap>{log.file_name || '-'}</Typography></Grid>
+                <Grid item xs={12} sm={3}>
+                  <Typography variant='body2' noWrap title={log.source_file_name || log.file_name || ''}>
+                    {log.source_file_name || log.file_name || '-'}
+                  </Typography>
+                </Grid>
                 <Grid item xs={6} sm={2}><Chip label={log.model || '-'} size='small' variant='outlined' sx={{ fontSize: 10 }} /></Grid>
-                <Grid item xs={6} sm={3}>
+                <Grid item xs={6} sm={2}>
                   <Typography variant='caption' color='text.secondary'>
                     {log.created_at ? new Date(log.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) : '-'}
                   </Typography>
                 </Grid>
-                <Grid item xs={6} sm={2}><Typography variant='caption'>{fmt(log.total_tokens)} tok</Typography></Grid>
-                <Grid item xs={6} sm={2}><Typography variant='caption' color='error.main'>${Number(log.cost_usd || 0).toFixed(5)}</Typography></Grid>
+                <Grid item xs={4} sm={1.5}><EventsChip log={log} /></Grid>
+                <Grid item xs={4} sm={1.25}><Typography variant='caption' noWrap>{fmt(log.total_tokens)} tok</Typography></Grid>
+                <Grid item xs={4} sm={1.25}><Typography variant='caption' color='error.main'>${Number(log.cost_usd || 0).toFixed(5)}</Typography></Grid>
+                <Grid item xs={12} sm={1}>
+                  {log.source_file_link && (
+                    <Tooltip title='Open the uploaded file'>
+                      {/* stopPropagation: without it the click also toggles the accordion */}
+                      <Button size='small' sx={{ minWidth: 0, px: 1 }}
+                        href={log.source_file_link} target='_blank' rel='noopener noreferrer'
+                        onClick={e => e.stopPropagation()} onFocus={e => e.stopPropagation()}>
+                        <OpenInNewIcon fontSize='small' />
+                      </Button>
+                    </Tooltip>
+                  )}
+                </Grid>
               </Grid>
             </AccordionSummary>
-            <AccordionDetails><ExtractedFields r={log.raw_result} /></AccordionDetails>
+            <AccordionDetails>
+              <SourceFilePreview log={log} />
+              <ExtractedFields r={log.raw_result} />
+            </AccordionDetails>
           </Accordion>
         ))}
       </Box>
@@ -246,9 +359,14 @@ const OcrUsagePage = () => {
         <TextField label='To month' type='month' size='small' InputLabelProps={{ shrink: true }} 
           value={filters.toMonth}
           onChange={e => { setFilters(f => ({ ...f, toMonth: e.target.value })); setPagination(p => ({ ...p, pageIndex: 0 })) }} />
+        <TextField select label='Result' size='small' sx={{ minWidth: 190 }}
+          value={filters.resultFilter}
+          onChange={e => { setFilters(f => ({ ...f, resultFilter: e.target.value })); setPagination(p => ({ ...p, pageIndex: 0 })) }}>
+          {RESULT_OPTIONS.map(o => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
+        </TextField>
         <Button size='small' onClick={() => {
           setMobileInput('')
-          setFilters({ mobile: '', fromDate: '', toDate: '', fromMonth: '', toMonth: '' })
+          setFilters(EMPTY_FILTERS)
           setPagination(p => ({ ...p, pageIndex: 0 }))
         }}>Clear</Button>
       </Stack>
@@ -261,6 +379,18 @@ const OcrUsagePage = () => {
           </Grid2>
           <Grid2 item xs={6} sm={4} md={2}>
             <SummaryCard label='Total pages' value={fmt(summary.requestCount)} />
+          </Grid2>
+          <Grid2 item xs={6} sm={4} md={2}>
+            {/* Clickable: the number is only useful if it takes you to the uploads behind it. */}
+            <Box sx={{ cursor: 'pointer', height: '100%' }}
+              onClick={() => { setFilters(f => ({ ...f, resultFilter: 'empty' })); setPagination(p => ({ ...p, pageIndex: 0 })) }}>
+              <SummaryCard label='Empty uploads' value={fmt(summary.emptyUploads)}
+                sub={`0 events · ₹${Number(summary.emptyCostInr || 0).toFixed(2)} spent${summary.estimatedEmptyUploads ? ` · ${fmt(summary.estimatedEmptyUploads)} estimated` : ''}`}
+                color='error.main' />
+            </Box>
+          </Grid2>
+          <Grid2 item xs={6} sm={4} md={2}>
+            <SummaryCard label='Uploads with events' value={fmt(summary.withEventsUploads)} sub='at least one event' color='success.main' />
           </Grid2>
           <Grid2 item xs={6} sm={4} md={2}>
             <SummaryCard label='Prompt Tokens' value={fmt(summary.totalPromptTokens)} sub='non-cached input' />
