@@ -104,6 +104,13 @@ const navigation = () => {
       icon: 'mdi:bell-ring-outline',
       action: 'read',
       subject: 'remindermanage'
+    },
+    {
+      title: 'WhatsApp Bot',
+      path: '/whatsapp-bot',
+      icon: 'mdi:whatsapp',
+      action: 'read',
+      subject: 'whatsappbot'
     }
 ]
 }

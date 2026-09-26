@@ -218,3 +218,8 @@ export const ocrProcessSessionUrl = `${baseURL}ocr-management/process-session`
 export const ocrReviewUrl = `${baseURL}ocr-management/review`
 export const ocrLeaderboardUrl = `${baseURL}ocr-management/leaderboard`
 export const ocrMainPromptUrl = `${baseURL}ocr-management/ocr-promt-api`
+
+// WhatsApp Bot Management (read-only, super-admin)
+export const waBotUsersUrl = `${baseURL}whatsapp-bot/users`
+export const waBotConversationUrl = `${baseURL}whatsapp-bot/conversation`
+export const waBotEventsUrl = `${baseURL}whatsapp-bot/events`

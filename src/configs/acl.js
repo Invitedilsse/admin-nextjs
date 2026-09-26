@@ -24,6 +24,7 @@ const defineRulesFor = (role, subject) => {
     can('manage','ocrmanage')
      can('manage','websiteredirect')
     can('manage','remindermanage')
+    can('manage','whatsappbot')
 
 
 
@@ -67,6 +68,7 @@ const defineRulesFor = (role, subject) => {
     can('manage','ocrmanage')
      can('manage','websiteredirect')
     can('manage','remindermanage')
+    can('manage','whatsappbot')
 
 
     accessible.action = 'campaign'
