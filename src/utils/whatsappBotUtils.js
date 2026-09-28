@@ -104,6 +104,41 @@ export const describeAction = row => {
   return parts.join(' · ')
 }
 
+/* ------------------------------------------------------------------ *
+ * Traffic flags
+ *
+ * These thresholds are a UI HINT ONLY — they colour a number and nothing else.
+ * No message is ever withheld because of them: only an admin pressing Block
+ * changes the bot's behaviour. They are set here rather than in the API so that
+ * changing what counts as "a lot" is a one-line edit with no deploy of the
+ * backend.
+ *
+ * The figures are a starting point, not a measurement. Watch the Users tab
+ * sorted by 24h traffic for a week and move them to wherever your real
+ * conversations sit.
+ * ------------------------------------------------------------------ */
+
+export const TRAFFIC_WARN = 30 // inbound messages in 24h worth a second look
+export const TRAFFIC_HIGH = 80 // inbound messages in 24h that look automated
+
+/**
+ * 'high' | 'warn' | null for one row's last-24-hour inbound count.
+ *
+ * Reads inbound, not outbound: the bot's replies are a consequence, and a
+ * number can be hammering it with messages the bot has already been told to
+ * ignore. Inbound is what the other side is actually doing.
+ */
+export const trafficLevel = row => {
+  const n = Number(row?.inbound_24h || 0)
+
+  if (n >= TRAFFIC_HIGH) return 'high'
+  if (n >= TRAFFIC_WARN) return 'warn'
+
+  return null
+}
+
+export const TRAFFIC_COLOR = { high: 'error.main', warn: 'warning.main' }
+
 /** A media message has no text of its own; name the attachment instead. */
 export const describeMedia = media =>
   media?.file_name || media?.mime_type || media?.type || 'attachment'

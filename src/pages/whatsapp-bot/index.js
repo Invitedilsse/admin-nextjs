@@ -10,8 +10,12 @@
  *   Users & Chats     every number that has messaged the bot; a row opens the
  *                     full transcript and what the bot created in that chat
  *   Scheduled Events  everything the bot created, with its live state
+ *   Blocked Numbers   numbers the bot has been told to stop answering
  *
- * Reads /api/whatsapp-bot. Nothing on this screen writes.
+ * Reads /api/whatsapp-bot. The only writes on this screen are Block and
+ * Unblock, and they write nothing but the block list. Enforcement is not here:
+ * the bot reads that list itself on every message, with no cache, so a block
+ * takes effect on that number's next message with nothing to restart.
  *
  * The conversation drawer lives HERE rather than inside each tab, so both tabs
  * open the same one and closing it does not remount whichever table is behind
@@ -26,6 +30,7 @@ import { TabContext, TabPanel } from '@mui/lab'
 
 import BotUsersPage from './Components/BotUsersPage'
 import BotEventsPage from './Components/BotEventsPage'
+import BlockedNumbersPage from './Components/BlockedNumbersPage'
 import ConversationDrawer from './Components/ConversationDrawer'
 
 const WhatsappBotManagement = () => {
@@ -69,6 +74,7 @@ const WhatsappBotManagement = () => {
             >
               <Tab value={1} label='Users & Chats' sx={{ textTransform: 'none', fontWeight: 600 }} />
               <Tab value={2} label='Scheduled Events' sx={{ textTransform: 'none', fontWeight: 600 }} />
+              <Tab value={3} label='Blocked Numbers' sx={{ textTransform: 'none', fontWeight: 600 }} />
             </Tabs>
 
             <TabPanel value={1} sx={{ p: 4 }}>
@@ -77,6 +83,10 @@ const WhatsappBotManagement = () => {
 
             <TabPanel value={2} sx={{ p: 4 }}>
               <BotEventsPage onOpenConversation={setOpenPhone} />
+            </TabPanel>
+
+            <TabPanel value={3} sx={{ p: 4 }}>
+              <BlockedNumbersPage onOpenConversation={setOpenPhone} />
             </TabPanel>
           </TabContext>
         </Box>

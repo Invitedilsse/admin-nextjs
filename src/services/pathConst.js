@@ -223,3 +223,7 @@ export const ocrMainPromptUrl = `${baseURL}ocr-management/ocr-promt-api`
 export const waBotUsersUrl = `${baseURL}whatsapp-bot/users`
 export const waBotConversationUrl = `${baseURL}whatsapp-bot/conversation`
 export const waBotEventsUrl = `${baseURL}whatsapp-bot/events`
+export const waBotBlockedUrl = `${baseURL}whatsapp-bot/blocked`
+export const waBotBlockHistoryUrl = `${baseURL}whatsapp-bot/block-history`
+export const waBotBlockUrl = `${baseURL}whatsapp-bot/block`
+export const waBotUnblockUrl = `${baseURL}whatsapp-bot/unblock`

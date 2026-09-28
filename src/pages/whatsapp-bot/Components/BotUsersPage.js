@@ -6,6 +6,12 @@
  * the app" is exactly what this screen is for.
  *
  * Clicking a row opens the full transcript.
+ *
+ * Sort by "Busiest (24h)" to find the number to block: it puts the heaviest bot
+ * traffic of the last day at the top, which is the order you want when you are
+ * looking for whoever is spamming. Those 24-hour counts are deliberately NOT
+ * affected by the date filter — they answer "who is hammering the bot right
+ * now", and a date range set in the past would silently zero them.
  */
 
 import React, { useCallback, useEffect, useState } from 'react'
@@ -33,7 +39,15 @@ import {
 
 import { apiGet } from 'src/hooks/axios'
 import { waBotUsersUrl } from 'src/services/pathConst'
-import { fmtNumber, formatDate, formatDateTime, fullName } from 'src/utils/whatsappBotUtils'
+import {
+  TRAFFIC_COLOR,
+  fmtNumber,
+  formatDate,
+  formatDateTime,
+  fullName,
+  trafficLevel
+} from 'src/utils/whatsappBotUtils'
+import BlockNumberDialog from './BlockNumberDialog'
 
 const SummaryCard = ({ label, value, sub, color = 'text.primary' }) => (
   <Card variant='outlined' sx={{ height: '100%' }}>
@@ -65,8 +79,13 @@ const BotUsersPage = ({ onOpenConversation }) => {
 
   // Typing does not fetch. `applied` is what the query uses, and it only
   // changes on Search/Enter — a request per keystroke is wasted round trips.
-  const [draft, setDraft] = useState({ search: '', registered: '', start_date: '', end_date: '' })
-  const [applied, setApplied] = useState({ search: '', registered: '', start_date: '', end_date: '' })
+  const BLANK = { search: '', registered: '', blocked: '', sort: 'recent', start_date: '', end_date: '' }
+
+  const [draft, setDraft] = useState(BLANK)
+  const [applied, setApplied] = useState(BLANK)
+
+  // { mode, phone, name } while the block confirmation is open.
+  const [dialog, setDialog] = useState(null)
 
   const fetchUsers = useCallback(async () => {
     setLoading(true)
@@ -76,6 +95,8 @@ const BotUsersPage = ({ onOpenConversation }) => {
         `page=${page + 1}`,
         applied.search ? `search=${encodeURIComponent(applied.search)}` : '',
         applied.registered ? `registered=${applied.registered}` : '',
+        applied.blocked ? `blocked=${applied.blocked}` : '',
+        applied.sort && applied.sort !== 'recent' ? `sort=${applied.sort}` : '',
         applied.start_date ? `start_date=${applied.start_date}` : '',
         applied.end_date ? `end_date=${applied.end_date}` : ''
       ]
@@ -105,14 +126,24 @@ const BotUsersPage = ({ onOpenConversation }) => {
   }
 
   const clear = () => {
-    const blank = { search: '', registered: '', start_date: '', end_date: '' }
-    setDraft(blank)
+    setDraft(BLANK)
     setPage(0)
-    setApplied(blank)
+    setApplied(BLANK)
   }
 
   /** The chip in the Status column. */
   const statusOf = row => {
+    // Blocked comes FIRST. It is the state that explains everything else on the
+    // row — a blocked number shows no recent replies and may sit mid-flow
+    // forever, and reading either of those as the problem would send an admin
+    // looking for a bug that is not there.
+    if (row.is_blocked) {
+      return (
+        <Tooltip title={row.blocked_reason || 'Blocked — the bot does not reply'} placement='top'>
+          <Chip label='Blocked' size='small' color='error' sx={{ height: 22, fontSize: 11 }} />
+        </Tooltip>
+      )
+    }
     if (row.failed_count > 0) {
       return <Chip label={`${row.failed_count} send failed`} size='small' color='error' sx={{ height: 22, fontSize: 11 }} />
     }
@@ -155,7 +186,19 @@ const BotUsersPage = ({ onOpenConversation }) => {
             />
           </Grid>
           <Grid size={{ xs: 6, sm: 4, md: 2 }}>
-            <SummaryCard label='Functions created' value={fmtNumber(summary.functions_created)} color='success.main' />
+            <SummaryCard
+              label='Replies (24h)'
+              value={fmtNumber(summary.replies_last_24h)}
+              sub='messages the bot sent'
+            />
+          </Grid>
+          <Grid size={{ xs: 6, sm: 4, md: 2 }}>
+            <SummaryCard
+              label='Blocked numbers'
+              value={fmtNumber(summary.blocked_numbers)}
+              sub={`${fmtNumber(summary.suppressed_messages)} replies stopped`}
+              color={summary.blocked_numbers > 0 ? 'error.main' : 'text.primary'}
+            />
           </Grid>
           <Grid size={{ xs: 6, sm: 4, md: 2 }}>
             <SummaryCard
@@ -191,6 +234,31 @@ const BotUsersPage = ({ onOpenConversation }) => {
           <MenuItem value='false'>No account</MenuItem>
         </TextField>
         <TextField
+          select
+          size='small'
+          label='Block list'
+          value={draft.blocked}
+          onChange={e => setDraft({ ...draft, blocked: e.target.value })}
+          sx={{ minWidth: 150 }}
+        >
+          <MenuItem value=''>All</MenuItem>
+          <MenuItem value='true'>Blocked</MenuItem>
+          <MenuItem value='false'>Not blocked</MenuItem>
+        </TextField>
+        <TextField
+          select
+          size='small'
+          label='Sort by'
+          value={draft.sort}
+          onChange={e => setDraft({ ...draft, sort: e.target.value })}
+          sx={{ minWidth: 190 }}
+        >
+          <MenuItem value='recent'>Most recent</MenuItem>
+          <MenuItem value='traffic'>Busiest (24h)</MenuItem>
+          <MenuItem value='inbound'>Most received (24h)</MenuItem>
+          <MenuItem value='messages'>Most messages ever</MenuItem>
+        </TextField>
+        <TextField
           size='small'
           label='From'
           type='date'
@@ -220,6 +288,11 @@ const BotUsersPage = ({ onOpenConversation }) => {
             <TableRow>
               <TableCell>User</TableCell>
               <TableCell>Last message</TableCell>
+              <TableCell align='right'>
+                <Tooltip title='Messages in the last 24 hours, ignoring the date filter' placement='top'>
+                  <span>Last 24h</span>
+                </Tooltip>
+              </TableCell>
               <TableCell align='right'>Messages</TableCell>
               <TableCell>Scheduled</TableCell>
               <TableCell>Status</TableCell>
@@ -230,13 +303,13 @@ const BotUsersPage = ({ onOpenConversation }) => {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={7} align='center' sx={{ py: 6 }}>
+                <TableCell colSpan={8} align='center' sx={{ py: 6 }}>
                   <CircularProgress />
                 </TableCell>
               </TableRow>
             ) : rows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} align='center' sx={{ py: 6 }}>
+                <TableCell colSpan={8} align='center' sx={{ py: 6 }}>
                   <Typography color='text.secondary'>No conversations match these filters.</Typography>
                 </TableCell>
               </TableRow>
@@ -265,12 +338,31 @@ const BotUsersPage = ({ onOpenConversation }) => {
                     </Tooltip>
                   </TableCell>
 
+                  {/**
+                    * Last 24 hours. Coloured by inbound volume only as a hint —
+                    * see trafficLevel in whatsappBotUtils. Nothing is withheld
+                    * because of this colour; only Block changes behaviour.
+                    */}
+                  <TableCell align='right'>
+                    <Typography
+                      variant='body2'
+                      fontWeight={700}
+                      color={TRAFFIC_COLOR[trafficLevel(row)] || 'text.primary'}
+                    >
+                      {fmtNumber(row.inbound_24h)}
+                    </Typography>
+                    <Typography variant='caption' color='text.secondary'>
+                      {fmtNumber(row.outbound_24h)} replies
+                    </Typography>
+                  </TableCell>
+
                   <TableCell align='right'>
                     <Typography variant='body2' fontWeight={600}>
                       {fmtNumber(row.message_count)}
                     </Typography>
                     <Typography variant='caption' color='text.secondary'>
                       {row.inbound_count} in / {row.outbound_count} out
+                      {row.suppressed_count > 0 ? ` / ${row.suppressed_count} stopped` : ''}
                     </Typography>
                   </TableCell>
 
@@ -319,9 +411,25 @@ const BotUsersPage = ({ onOpenConversation }) => {
                   </TableCell>
 
                   <TableCell align='right'>
-                    <Button size='small' variant='outlined' onClick={() => onOpenConversation(row.phone)}>
-                      View chat
-                    </Button>
+                    <Stack direction='row' spacing={1} justifyContent='flex-end'>
+                      <Button size='small' variant='outlined' onClick={() => onOpenConversation(row.phone)}>
+                        View chat
+                      </Button>
+                      <Button
+                        size='small'
+                        variant={row.is_blocked ? 'contained' : 'outlined'}
+                        color={row.is_blocked ? 'success' : 'error'}
+                        onClick={() =>
+                          setDialog({
+                            mode: row.is_blocked ? 'unblock' : 'block',
+                            phone: row.phone,
+                            name: fullName(row)
+                          })
+                        }
+                      >
+                        {row.is_blocked ? 'Unblock' : 'Block'}
+                      </Button>
+                    </Stack>
                   </TableCell>
                 </TableRow>
               ))
@@ -341,6 +449,15 @@ const BotUsersPage = ({ onOpenConversation }) => {
           setLimit(parseInt(e.target.value, 10))
           setPage(0)
         }}
+      />
+
+      <BlockNumberDialog
+        open={!!dialog}
+        mode={dialog?.mode}
+        phone={dialog?.phone}
+        name={dialog?.name}
+        onClose={() => setDialog(null)}
+        onDone={fetchUsers}
       />
     </Box>
   )
