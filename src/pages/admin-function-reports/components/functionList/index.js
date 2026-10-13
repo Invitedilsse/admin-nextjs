@@ -334,7 +334,7 @@ const [addUserOpen, setAddUserOpen] = useState(false)
                     input: {
                       endAdornment: (
                         <IconButton onClick={() => setSearchText(tempSearchText)}>
-                          <MuiIcon icon='fluent:search-20-regular' width={20} height={20} />
+                          <MuiIcon icon='tabler:search' width={20} height={20} />
                         </IconButton>
                       )
                     }

@@ -120,7 +120,7 @@ const ReminderDetailDrawer = ({ open, reminderId, toggle }) => {
       <Header>
         <Typography variant='h6'>Reminder Details</Typography>
         <IconButton size='small' onClick={toggle}>
-          <Icon icon='mdi:close' fontSize={20} />
+          <Icon icon='tabler:x' fontSize={20} />
         </IconButton>
       </Header>
 
@@ -262,7 +262,7 @@ const ReminderDetailDrawer = ({ open, reminderId, toggle }) => {
             ) : (
               data.attachments.map(a => (
                 <Stack key={a.id} direction='row' spacing={1} alignItems='center' sx={{ py: 0.5 }}>
-                  <Icon icon='mdi:file-document-outline' fontSize={18} />
+                  <Icon icon='tabler:file-text' fontSize={18} />
                   <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Link href={a.file_url} target='_blank' rel='noopener' variant='body2' noWrap display='block'>
                       {a.file_name || 'Attachment'}

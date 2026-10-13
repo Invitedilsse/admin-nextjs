@@ -733,7 +733,7 @@ const InviteesMapping = () => {
                   input: {
                     endAdornment: (
                       <IconButton onClick={() => setSearchText(tempSearchText)}>
-                        <Icon icon='fluent:search-20-regular' width={20} height={20} />
+                        <Icon icon='tabler:search' width={20} height={20} />
                       </IconButton>
                     )
                   }
@@ -783,7 +783,7 @@ const InviteesMapping = () => {
                   input: {
                     endAdornment: (
                       <IconButton onClick={() => setSearchText(tempSearchText)}>
-                        <Icon icon='fluent:search-20-regular' width={20} height={20} />
+                        <Icon icon='tabler:search' width={20} height={20} />
                       </IconButton>
                     )
                   }

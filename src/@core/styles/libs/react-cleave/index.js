@@ -12,10 +12,10 @@ const CleaveWrapper = styled(Box)(({ theme }) => ({
     borderRadius: theme.shape.borderRadius,
     fontSize: theme.typography.body1.fontSize,
     fontFamily: theme.typography.body1.fontFamily,
-    border: `1px solid ${theme.palette.customColors.main}`,
+    border: `1px solid rgba(${theme.palette.customColors.mainRgb}, 0.2)`,
     transition: theme.transitions.create(['border-color', 'box-shadow']),
     '&:hover': {
-      borderColor: `rgba(${theme.palette.customColors.main}, 0.28)`
+      borderColor: `rgba(${theme.palette.customColors.mainRgb}, 0.28)`
     },
     '&:focus, &:focus-visible': {
       outline: 0,

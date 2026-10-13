@@ -1,5 +1,18 @@
 import { TabContext, TabPanel } from '@mui/lab'
-import { Button, Card, CardContent, Divider, Grid2, Icon, IconButton, Tab, Tabs, TextField } from '@mui/material'
+import {
+  Button,
+  Card,
+  CardContent,
+  Divider,
+  Grid2,
+  IconButton,
+  Tab,
+  Tabs,
+  TextField
+} from '@mui/material'
+
+// ** Iconify's Icon, not @mui/material's: only this one has an `icon` prop.
+import Icon from 'src/@core/components/icon'
 import { Fragment, useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Box } from '@mui/system'
@@ -301,7 +314,7 @@ const DetailByStatusTabs = ({ type }) => {
                         input: {
                           endAdornment: (
                             <IconButton onClick={() => setSearchText(tempSearchText)}>
-                              <Icon icon='fluent:search-20-regular' width={20} height={20} />
+                              <Icon icon='tabler:search' width={20} height={20} />
                             </IconButton>
                           )
                         }

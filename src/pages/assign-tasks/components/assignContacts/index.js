@@ -8,9 +8,11 @@ import {
   Divider,
   Card,
   TextField,
-  IconButton,
-  Icon
+  IconButton
 } from '@mui/material'
+
+// ** Iconify's Icon, not @mui/material's: only this one has an `icon` prop.
+import Icon from 'src/@core/components/icon'
 import Grid2 from '@mui/material/Grid2'
 import { Edit, Send } from '@mui/icons-material'
 import { MaterialReactTable, useMaterialReactTable } from 'material-react-table'
@@ -354,7 +356,7 @@ const generateColumns = ({ onToggle, onToggleColumn }) => {
                       input: {
                         endAdornment: (
                           <IconButton onClick={() => setSearchText(tempSearchText)}>
-                            <Icon icon='fluent:search-20-regular' width={20} height={20} />
+                            <Icon icon='tabler:search' width={20} height={20} />
                           </IconButton>
                         )
                       }

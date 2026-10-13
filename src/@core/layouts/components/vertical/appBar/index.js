@@ -3,31 +3,34 @@ import { styled } from '@mui/material/styles'
 import MuiAppBar from '@mui/material/AppBar'
 import MuiToolbar from '@mui/material/Toolbar'
 
-// ** Util Import
-import { hexToRGBA } from 'src/@core/utils/hex-to-rgba'
-
+/**
+ * The page header.
+ * -------------------------------------------------------------------------------------
+ * The template floated this as a rounded white card with a 16px gap above it and a
+ * blur gradient behind, so the header slid under the content as you scrolled. Two
+ * problems: the gap meant the page had no fixed top edge to align to, and a blurred
+ * gradient over a near-white page is a compositing layer that shows nothing.
+ *
+ * It is a flush bar now - full width, one hairline along the bottom, square - which
+ * is what every portal you would call high end does, because it gives the sidebar
+ * divider and the header divider a single corner to meet at.
+ */
 const AppBar = styled(MuiAppBar)(({ theme }) => ({
   transition: 'none',
   alignItems: 'center',
   justifyContent: 'center',
-  backgroundColor: 'transparent',
+  padding: 0,
   color: theme.palette.text.primary,
-  minHeight: theme.mixins.toolbar.minHeight,
-  [theme.breakpoints.up('sm')]: {
-    paddingLeft: theme.spacing(6),
-    paddingRight: theme.spacing(6)
-  },
-  [theme.breakpoints.down('sm')]: {
-    paddingLeft: theme.spacing(4),
-    paddingRight: theme.spacing(4)
-  }
+  backgroundColor: theme.palette.background.paper,
+  borderBottom: `1px solid ${theme.palette.divider}`,
+  minHeight: theme.mixins.toolbar.minHeight
 }))
 
 const Toolbar = styled(MuiToolbar)(({ theme }) => ({
   width: '100%',
-  marginTop: theme.spacing(4),
-  borderRadius: theme.shape.borderRadius,
-  padding: `${theme.spacing(0, 6)} !important`
+  borderRadius: 0,
+  [theme.breakpoints.up('sm')]: { padding: `${theme.spacing(0, 6)} !important` },
+  [theme.breakpoints.down('sm')]: { padding: `${theme.spacing(0, 4)} !important` }
 }))
 
 const LayoutAppBar = props => {
@@ -35,27 +38,8 @@ const LayoutAppBar = props => {
   const { settings, appBarProps, appBarContent: userAppBarContent } = props
 
   // ** Vars
-  const { skin, appBar, appBarBlur, contentWidth } = settings
+  const { appBar, contentWidth } = settings
 
-  const appBarBlurEffect = appBarBlur && {
-    '&:after': {
-      top: 0,
-      left: 0,
-      zIndex: -1,
-      width: '100%',
-      content: '""',
-      position: 'absolute',
-      backdropFilter: 'blur(10px)',
-      height: theme => `calc(${theme.mixins.toolbar.minHeight}px + ${theme.spacing(4)})`,
-      mask: theme =>
-        `linear-gradient(${theme.palette.background.default}, ${theme.palette.background.default} 18%, transparent 100%)`,
-      background: theme =>
-        `linear-gradient(180deg,${hexToRGBA(theme.palette.background.default, 0.7)} 44%, ${hexToRGBA(
-          theme.palette.background.default,
-          0.43
-        )} 73%, ${hexToRGBA(theme.palette.background.default, 0)})`
-    }
-  }
   if (appBar === 'hidden') {
     return null
   }
@@ -71,17 +55,14 @@ const LayoutAppBar = props => {
       elevation={0}
       color='default'
       className='layout-navbar'
-      sx={{ ...appBarBlurEffect, ...userAppBarStyle }}
+      sx={{ ...userAppBarStyle }}
       position={appBar === 'fixed' ? 'sticky' : 'static'}
       {...userAppBarProps}
     >
       <Toolbar
         className='navbar-content-container'
         sx={{
-          ...(appBarBlur && { backdropFilter: 'blur(6px)' }),
           minHeight: theme => `${theme.mixins.toolbar.minHeight}px !important`,
-          backgroundColor: theme => hexToRGBA(theme.palette.background.paper, appBarBlur ? 0.95 : 1),
-          ...(skin === 'bordered' ? { border: theme => `1px solid ${theme.palette.divider}` } : { boxShadow: 2 }),
           ...(contentWidth === 'boxed' && {
             '@media (min-width:1440px)': { maxWidth: theme => `calc(1440px - ${theme.spacing(6 * 2)})` }
           })

@@ -75,11 +75,11 @@ export const avatarColor = seed => {
 }
 
 export const MESSAGE_TYPE_ICON = {
-  text: 'mdi:message-text-outline',
+  text: 'tabler:message-2',
   image: 'mdi:image-outline',
   video: 'mdi:video-outline',
-  audio: 'mdi:microphone-outline',
-  file: 'mdi:paperclip',
+  audio: 'tabler:microphone',
+  file: 'tabler:paperclip',
   system: 'mdi:information-outline'
 }
 

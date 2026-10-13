@@ -21,7 +21,12 @@ const initialSettings = {
   appBar: themeConfig.layout === 'horizontal' && themeConfig.appBar === 'hidden' ? 'fixed' : themeConfig.appBar
 }
 
+// ** Settings the user cannot change, re-read from themeConfig on every load.
+// ! mode is in here deliberately. The portal ships light only, and without this
+//   anyone who had ever pressed the old dark-mode toggle stayed dark forever,
+//   because the stored value won over themeConfig.
 const staticSettings = {
+  mode: initialSettings.mode,
   appBar: initialSettings.appBar,
   footer: initialSettings.footer,
   layout: initialSettings.layout,
@@ -49,6 +54,7 @@ const restoreSettings = () => {
 // set settings in localStorage
 const storeSettings = settings => {
   const initSettings = Object.assign({}, settings)
+  delete initSettings.mode
   delete initSettings.appBar
   delete initSettings.footer
   delete initSettings.layout

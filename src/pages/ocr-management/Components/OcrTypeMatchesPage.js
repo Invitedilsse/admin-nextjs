@@ -163,7 +163,7 @@ const OcrTypeMatchesPage = () => {
           variant='contained'
           onClick={handleExport}
           disabled={exporting || loading}
-          startIcon={<Icon icon='mdi:file-excel-outline' />}
+          startIcon={<Icon icon='tabler:file-spreadsheet' />}
           sx={{ background: '#1D6F42', '&:hover': { background: '#155932' } }}
         >
           {exporting ? 'Exporting...' : 'Export to Excel'}

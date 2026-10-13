@@ -205,7 +205,7 @@ function OfflineFunctionDetailsById({ page, RowData, setfunctionDetails, handleC
           color: 'text.primary',
           backgroundColor: 'action.selected',
           '&:hover': {
-            backgroundColor: theme => `rgba(${theme.palette.customColors.main}, 0.16)`
+            backgroundColor: theme => `rgba(${theme.palette.customColors.mainRgb}, 0.16)`
           }
         }}
       >

@@ -1,4 +1,8 @@
+// ** Deep merge, so the portal's refinements replace only the keys they state.
+import { deepmerge } from '@mui/utils'
+
 // ** Overrides Imports
+import Refinements from './refinements'
 import MuiCard from './card'
 import MuiChip from './chip'
 import MuiLink from './link'
@@ -72,7 +76,7 @@ const Overrides = settings => {
   const buttonGroup = MuiButtonGroup()
   const autocomplete = MuiAutocomplete(skin)
 
-  return Object.assign(
+  const merged = Object.assign(
     chip,
     list,
     menu,
@@ -112,6 +116,11 @@ const Overrides = settings => {
     MuiTypography,
     MuiToggleButton
   )
+
+  // ** ./refinements.js holds every visual decision for this portal. It is
+  //    merged last and states only deltas, so reverting the redesign is
+  //    deleting this line and the two imports above.
+  return deepmerge(merged, Refinements(settings))
 }
 
 export default Overrides

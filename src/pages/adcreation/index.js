@@ -45,8 +45,6 @@ function AdTemplateList({ RowData }) {
   const [dopen, setdOpen] = useState(false)
   const [delId, setdelId] = useState('')
   const [delLoading, setDelLoading] = useState(false)
-  const baseBluewaabaURL = process.env.BLUEWAABA_URL
-  const baseBluewaabaToken = process.env.BLUEWAABA_TOKEN
 
 
 

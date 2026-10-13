@@ -35,7 +35,7 @@ const Pagination = () => {
           height: 'auto'
         },
         outlined: ({ theme }) => ({
-          borderColor: `rgba(${theme.palette.customColors.main}, 0.2)`
+          borderColor: `rgba(${theme.palette.customColors.mainRgb}, 0.2)`
         }),
         outlinedPrimary: ({ theme }) => ({
           '&.Mui-selected': {

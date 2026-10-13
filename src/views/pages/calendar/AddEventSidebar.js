@@ -363,7 +363,7 @@ const AddEventSidebar = props => {
               onClick={() => handleJoinEvent(store.selectedEvent)}
               // onClick={() => dispatch(fetchEvents(['Personal', 'Business', 'Family', 'Holiday', 'ETC']))}
             >
-              <Icon icon='streamline:group-meeting-call-solid' fontSize='1.125rem' />
+              <Icon icon='tabler:phone-call' fontSize='1.125rem' />
               Join
             </Button>
             <Divider
@@ -414,7 +414,7 @@ const AddEventSidebar = props => {
                 color: 'text.primary',
                 backgroundColor: 'action.selected',
                 '&:hover': {
-                  backgroundColor: theme => `rgba(${theme.palette.customColors.main}, 0.16)`
+                  backgroundColor: theme => `rgba(${theme.palette.customColors.mainRgb}, 0.16)`
                 }
               }}
             >

@@ -205,7 +205,7 @@ const SideBarSpecialInvitee = props => {
                 color: 'text.primary',
                 backgroundColor: 'action.selected',
                 '&:hover': {
-                  backgroundColor: theme => `rgba(${theme.palette.customColors.main}, 0.16)`
+                  backgroundColor: theme => `rgba(${theme.palette.customColors.mainRgb}, 0.16)`
                 }
               }}
             >
@@ -368,17 +368,17 @@ const SideBarSpecialInvitee = props => {
                             }
                           }}
                         >
-                          <Icon icon='lsicon:view-outline' fontSize='1.75rem' color='grey' />
+                          <Icon icon='tabler:eye' fontSize='1.75rem' color='grey' />
                         </IconButton>
                         <IconButton edge='end' aria-label='delete' onClick={() => setInviteFile([])}>
-                          <Icon icon='ic:twotone-delete' fontSize='1.75rem' color='red' />
+                          <Icon icon='tabler:trash' fontSize='1.75rem' color='red' />
                         </IconButton>
                       </>
                     }
                   >
                     <ListItemButton>
                       <ListItemIcon>
-                        <Icon icon='mingcute:invite-line' fontSize='1.75rem' />
+                        <Icon icon='tabler:send' fontSize='1.75rem' />
                       </ListItemIcon>
                       <ListItemText
                         primary={

@@ -15,7 +15,14 @@ import {
 import { useRouter } from "next/router";
 import { apiGet } from "src/hooks/axios";
 import { baseURL } from "src/services/pathConst";
-import ContactsTabs from "./components/FamilContactDisplay";
+// The one real copy of this component lives beside the original
+// users-history page. These two pages are copies of it, but their own
+// components/ folders only ever got UserContactList.js — so "./components/..."
+// pointed at a file that has never existed here. Imported by its project
+// path (jsconfig baseUrl is "."), the same way this file already imports
+// src/hooks/axios, rather than copied a third and fourth time: three copies
+// of one component drift, and only one of them gets the next fix.
+import ContactsTabs from "src/pages/users-history/components/FamilContactDisplay";
 import UserContactList from "./components/UserContactList";
 import { TabContext, TabPanel } from '@mui/lab'
 

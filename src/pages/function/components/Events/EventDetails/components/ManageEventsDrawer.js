@@ -567,14 +567,14 @@ const SideBarEvents = props => {
                     p: '0.438rem',
                     borderRadius: 1,
                     '&:hover': {
-                      backgroundColor: theme => `rgba(${theme.palette.customColors.main}, 0.16)`
+                      backgroundColor: theme => `rgba(${theme.palette.customColors.mainRgb}, 0.16)`
                     }
                   }}
                   onClick={handleClose}
                   variant='outlined'
                   size='small'
                 >
-                  <Icon icon='famicons:arrow-back-outline' fontSize={20} />
+                  <Icon icon='tabler:arrow-left' fontSize={20} />
                 </IconButton>
                 <Typography variant='h5'>
                   {eventId !== '' ? 'Edit Event - ' + `${titleName}` : 'Create Event'}
@@ -587,7 +587,7 @@ const SideBarEvents = props => {
                       p: '0.438rem',
                       borderRadius: 1,
                       '&:hover': {
-                        backgroundColor: theme => `rgba(${theme.palette.customColors.main}, 0.16)`
+                        backgroundColor: theme => `rgba(${theme.palette.customColors.mainRgb}, 0.16)`
                       }
                     }}
                     onClick={() => setIsEdit(!isEdit)}
@@ -822,7 +822,7 @@ const SideBarEvents = props => {
                             startAdornment: (
                               <InputAdornment position='end'>
                                 <IconButton onClick={() => setModelOpen(true)}>
-                                  <Icon icon='ic:twotone-info' />
+                                  <Icon icon='tabler:info-circle' />
                                 </IconButton>
                               </InputAdornment>
                             )
@@ -1018,7 +1018,7 @@ const SideBarEvents = props => {
                                     }
                                   }}
                                 >
-                                  <Icon icon='lsicon:view-outline' fontSize='1.75rem' color='grey' />
+                                  <Icon icon='tabler:eye' fontSize='1.75rem' color='grey' />
                                 </IconButton>
                                 {isEdit && (
                                   <IconButton
@@ -1029,7 +1029,7 @@ const SideBarEvents = props => {
                                       formik.setFieldValue('fileImagePreview', null)
                                     }}
                                   >
-                                    <Icon icon='ic:twotone-delete' fontSize='1.75rem' color='red' />
+                                    <Icon icon='tabler:trash' fontSize='1.75rem' color='red' />
                                   </IconButton>
                                 )}
                               </>
@@ -1037,7 +1037,7 @@ const SideBarEvents = props => {
                           >
                             <ListItemButton>
                               <ListItemIcon>
-                                <Icon icon='mingcute:invite-line' fontSize='1.75rem' />
+                                <Icon icon='tabler:send' fontSize='1.75rem' />
                               </ListItemIcon>
                               <ListItemText
                                 primary={

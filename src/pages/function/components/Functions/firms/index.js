@@ -308,7 +308,7 @@ const Firms = ({ isOpen }) => {
                   sx={{ fontSize: '18px' }}
                 >
                   {' '}
-                  <Icon icon='ic:outline-delete' color='error' />
+                  <Icon icon='tabler:trash' color='error' />
                 </IconButton>
               </Tooltip>
             }
@@ -422,7 +422,7 @@ const Firms = ({ isOpen }) => {
                   input: {
                     endAdornment: (
                       <IconButton onClick={() => setSearchText(tempSearchText)}>
-                        <Icon icon='fluent:search-20-regular' width={20} height={20} />
+                        <Icon icon='tabler:search' width={20} height={20} />
                       </IconButton>
                     )
                   }
@@ -579,7 +579,7 @@ const Firms = ({ isOpen }) => {
                                 }
                               }}
                             >
-                              <Icon icon='lsicon:view-outline' fontSize='1.75rem' color='grey' />
+                              <Icon icon='tabler:eye' fontSize='1.75rem' color='grey' />
                             </IconButton>
                             <IconButton
                               edge='end'
@@ -600,14 +600,14 @@ const Firms = ({ isOpen }) => {
                                 // )
                               }}
                             >
-                              <Icon icon='ic:twotone-delete' fontSize='1.75rem' color='red' />
+                              <Icon icon='tabler:trash' fontSize='1.75rem' color='red' />
                             </IconButton>
                           </>
                         }
                       >
                         <ListItemButton>
                           <ListItemIcon>
-                            <Icon icon='mingcute:invite-line' fontSize='1.75rem' />
+                            <Icon icon='tabler:send' fontSize='1.75rem' />
                           </ListItemIcon>
                           <ListItemText
                             primary={

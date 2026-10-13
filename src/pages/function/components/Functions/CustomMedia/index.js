@@ -359,7 +359,7 @@ const CustomMediaFunction = props => {
                     backgroundColor: theme => `rgba(${theme.palette.primary.main}, 0.08)`
                   }}
                 >
-                  <Icon icon='proicons:pdf-2' fontSize='1.75rem' />
+                  <Icon icon='tabler:file-text' fontSize='1.75rem' />
                 </Box>
                 <Typography variant='h6' sx={{ mb: 2.5 }}>
                   Drop PDF Invite here or click to upload. (Max file size: 50MB)
@@ -381,18 +381,18 @@ const CustomMediaFunction = props => {
                           window.open(invitePDFFile?.file[0]?.url, '_blank')
                         }
                       }}>
-                        <Icon icon='lsicon:view-outline' fontSize='1.75rem' color='grey' />
+                        <Icon icon='tabler:eye' fontSize='1.75rem' color='grey' />
                       </IconButton>
                       <IconButton edge='end' aria-label='delete' onClick={() => {
                         handleDeleteCustomMedia(invitePDFFile?.file[0]?.key, 'pdf', invitePDFFile?.id)
                       }}>
-                        <Icon icon='ic:twotone-delete' fontSize='1.75rem' color='red' />
+                        <Icon icon='tabler:trash' fontSize='1.75rem' color='red' />
                       </IconButton>
                     </>
                   }>
                     <ListItemButton>
                       <ListItemIcon>
-                        <Icon icon='proicons:pdf-2' fontSize='1.75rem' color="primary.main" />
+                        <Icon icon='tabler:file-text' fontSize='1.75rem' color="primary.main" />
                       </ListItemIcon>
                       <ListItemText primary={invitePDFFile && invitePDFFile?.file && invitePDFFile?.file[0]?.file_name} />
                     </ListItemButton>
@@ -438,7 +438,7 @@ const CustomMediaFunction = props => {
                     backgroundColor: theme => `rgba(${theme.palette.primary.main}, 0.08)`
                   }}
                 >
-                  <Icon icon='ic:twotone-music-video' fontSize='1.75rem' />
+                  <Icon icon='tabler:music' fontSize='1.75rem' />
                 </Box>
                 <Typography variant='h6' sx={{ mb: 2.5 }}>
                   Drop Music Invite here or click to add.(Max file size: 50MB)
@@ -460,18 +460,18 @@ const CustomMediaFunction = props => {
                           window.open(inviteMusicFile?.file[0]?.url, '_blank')
                         }
                       }}>
-                        <Icon icon='lsicon:view-outline' fontSize='1.75rem' color='grey' />
+                        <Icon icon='tabler:eye' fontSize='1.75rem' color='grey' />
                       </IconButton>
                       <IconButton edge='end' aria-label='delete' onClick={() => {
                         handleDeleteCustomMedia(inviteMusicFile?.file[0]?.key, 'music', inviteMusicFile?.id)
                       }}>
-                        <Icon icon='ic:twotone-delete' fontSize='1.75rem' color='red' />
+                        <Icon icon='tabler:trash' fontSize='1.75rem' color='red' />
                       </IconButton>
                     </>
                   }>
                     <ListItemButton>
                       <ListItemIcon>
-                        <Icon icon='ic:twotone-music-video' fontSize='1.75rem' />
+                        <Icon icon='tabler:music' fontSize='1.75rem' />
                       </ListItemIcon>
                       <ListItemText primary={inviteMusicFile && inviteMusicFile?.file && inviteMusicFile?.file[0]?.file_name} />
                     </ListItemButton>
@@ -517,7 +517,7 @@ const CustomMediaFunction = props => {
                     backgroundColor: theme => `rgba(${theme.palette.primary.main}, 0.08)`
                   }}
                 >
-                  <Icon icon='ri:video-fill' fontSize='1.75rem' />
+                  <Icon icon='tabler:video' fontSize='1.75rem' />
                 </Box>
                 <Typography variant='h6' sx={{ mb: 2.5 }}>
                   Drop Video Invite here or click to add.(Max file size: 100MB)
@@ -539,18 +539,18 @@ const CustomMediaFunction = props => {
                           window.open(inviteVideoFile?.file[0]?.url, '_blank')
                         }
                       }}>
-                        <Icon icon='lsicon:view-outline' fontSize='1.75rem' color='grey' />
+                        <Icon icon='tabler:eye' fontSize='1.75rem' color='grey' />
                       </IconButton>
                       <IconButton edge='end' aria-label='delete' onClick={() => {
                         handleDeleteCustomMedia(inviteVideoFile?.file[0]?.key, 'video', inviteVideoFile?.id)
                       }}>
-                        <Icon icon='ic:twotone-delete' fontSize='1.75rem' color='red' />
+                        <Icon icon='tabler:trash' fontSize='1.75rem' color='red' />
                       </IconButton>
                     </>
                   }>
                     <ListItemButton>
                       <ListItemIcon>
-                        <Icon icon='ri:video-fill' fontSize='1.75rem' />
+                        <Icon icon='tabler:video' fontSize='1.75rem' />
                       </ListItemIcon>
                       <ListItemText primary={inviteVideoFile && inviteVideoFile?.file && inviteVideoFile?.file[0]?.file_name} />
                     </ListItemButton>
@@ -596,7 +596,7 @@ const CustomMediaFunction = props => {
                     backgroundColor: theme => `rgba(${theme.palette.primary.main}, 0.08)`
                   }}
                 >
-                  <Icon icon='icon-park-twotone:voice-one' fontSize='1.75rem' />
+                  <Icon icon='tabler:microphone' fontSize='1.75rem' />
                 </Box>
                 <Typography variant='h6' sx={{ mb: 2.5 }}>
                   Drop Voice Invite here or click to add.(Max file size: 50MB)
@@ -618,18 +618,18 @@ const CustomMediaFunction = props => {
                           window.open(inviteVoiceFile?.file[0]?.url, '_blank')
                         }
                       }}>
-                        <Icon icon='lsicon:view-outline' fontSize='1.75rem' color='grey' />
+                        <Icon icon='tabler:eye' fontSize='1.75rem' color='grey' />
                       </IconButton>
                       <IconButton edge='end' aria-label='delete' onClick={() => {
                         handleDeleteCustomMedia(inviteVoiceFile?.file[0]?.key, 'voice', inviteVoiceFile?.id)
                       }}>
-                        <Icon icon='ic:twotone-delete' fontSize='1.75rem' color='red' />
+                        <Icon icon='tabler:trash' fontSize='1.75rem' color='red' />
                       </IconButton>
                     </>
                   }>
                     <ListItemButton>
                       <ListItemIcon>
-                        <Icon icon='icon-park-twotone:voice-one' fontSize='1.75rem' />
+                        <Icon icon='tabler:microphone' fontSize='1.75rem' />
                       </ListItemIcon>
                       <ListItemText primary={inviteVoiceFile && inviteVoiceFile?.file && inviteVoiceFile?.file[0]?.file_name} />
                     </ListItemButton>

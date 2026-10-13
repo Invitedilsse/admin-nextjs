@@ -167,15 +167,20 @@ const VerticalNavGroup = props => {
             })}
             sx={{
               py: 2,
-              mx: 3.5,
+              mx: 3,
               borderRadius: 1,
-              width: theme => `calc(100% - ${theme.spacing(3.5 * 2)})`,
+              width: theme => `calc(100% - ${theme.spacing(3 * 2)})`,
               transition: 'padding-left .25s ease-in-out, padding-right .25s ease-in-out',
               px: navCollapsed && !navHover ? (collapsedNavWidth - navigationBorderWidth - 22 - 28) / 8 : 4,
               '&:hover': {
                 backgroundColor: 'action.hover'
               },
-              '& .MuiTypography-root, & :not(.menu-item-meta) > svg': {
+              '& .MuiTypography-root': {
+                fontWeight: 500,
+                color: 'text.secondary',
+                fontSize: theme => theme.typography.body1.fontSize
+              },
+              '& :not(.menu-item-meta) > svg': {
                 color: 'text.secondary'
               },
               '&.Mui-selected': {
@@ -183,7 +188,11 @@ const VerticalNavGroup = props => {
                 '&:hover': {
                   backgroundColor: 'action.selected'
                 },
-                '& .MuiTypography-root, & :not(.menu-item-meta) > svg': {
+                '& .MuiTypography-root': {
+                  fontWeight: 600,
+                  color: 'text.primary'
+                },
+                '& :not(.menu-item-meta) > svg': {
                   color: 'text.primary'
                 },
                 '& .menu-item-meta > svg': {

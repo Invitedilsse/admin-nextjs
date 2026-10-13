@@ -173,7 +173,7 @@ const FileHandle = () => {
                   sx={{ fontSize: '18px' }}
                 >
                   {' '}
-                  <Icon icon='ic:outline-delete' color='error' />
+                  <Icon icon='tabler:trash' color='error' />
                 </IconButton>
               </Tooltip>
             }

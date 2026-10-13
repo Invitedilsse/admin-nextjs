@@ -38,7 +38,6 @@ const Drawer = props => {
 
   // ** Vars
   const { skin, navCollapsed } = settings
-  let flag = true
 
   // Drawer Props for Mobile & Tablet screens
   const MobileDrawerProps = {
@@ -55,15 +54,15 @@ const Drawer = props => {
     open: true,
     onOpen: () => null,
     onClose: () => null,
+    // ** navHover only ever means something while the menu is collapsed, so it is
+    //    only ever set while the menu is collapsed. That is the whole fix.
     onMouseEnter: () => {
-      // Declared flag to resolve first time flicker issue while trying to collapse the menu
-      if (flag || navCollapsed) {
+      if (navCollapsed) {
         setNavHover(true)
-        flag = false
       }
     },
     onMouseLeave: () => {
-      if (navCollapsed) {
+      if (navHover) {
         setNavHover(false)
       }
     }
@@ -88,10 +87,11 @@ const Drawer = props => {
       PaperProps={{
         sx: {
           backgroundColor: 'background.paper',
-          ...(!hidden && skin !== 'bordered' && { boxShadow: 2 }),
           width: navCollapsed && !navHover ? collapsedNavWidth : navWidth,
-          borderRight: theme =>
-            navigationBorderWidth === 0 ? 0 : `${navigationBorderWidth}px solid ${theme.palette.divider}`,
+          // ** A hairline, not a shadow. A drop shadow down a 268px column reads as a
+          //    seam; a 1px divider reads as structure. This has to be the LAST
+          //    borderRight in this object - an earlier one is silently overwritten.
+          borderRight: theme => `1px solid ${theme.palette.divider}`,
           ...userNavMenuPaperStyle
         },
         ...navMenuProps?.PaperProps

@@ -240,7 +240,7 @@ const SideBarGiftType = props => {
                 color: 'text.primary',
                 backgroundColor: 'action.selected',
                 '&:hover': {
-                  backgroundColor: theme => `rgba(${theme.palette.customColors.main}, 0.16)`
+                  backgroundColor: theme => `rgba(${theme.palette.customColors.mainRgb}, 0.16)`
                 }
               }}
             >
@@ -462,7 +462,7 @@ const SideBarGiftType = props => {
                         backgroundColor: theme => `rgba(${theme.palette.primary.main}, 0.08)`
                       }}
                     >
-                      <Icon icon='vscode-icons:file-type-excel' fontSize='1.75rem' />
+                      <Icon icon='tabler:file-spreadsheet' fontSize='1.75rem' />
                     </Box>
                     <Typography variant='h6' sx={{ mb: 2.5 }}>
                       Drop Excel here or click to add.
@@ -496,16 +496,16 @@ const SideBarGiftType = props => {
                 URL.revokeObjectURL(url);
               }
               }}>
-            <Icon icon='lsicon:view-outline' fontSize='1.75rem'  color='grey' />
+            <Icon icon='tabler:eye' fontSize='1.75rem'  color='grey' />
           </IconButton>
             <IconButton edge='end' aria-label='delete' onClick={() => setInviteFile([])}>
-            <Icon icon='ic:twotone-delete' fontSize='1.75rem'  color='red' />
+            <Icon icon='tabler:trash' fontSize='1.75rem'  color='red' />
           </IconButton>
           </>
           }>
             <ListItemButton>
               <ListItemIcon>
-              <Icon icon='mingcute:invite-line' fontSize='1.75rem' />
+              <Icon icon='tabler:send' fontSize='1.75rem' />
               </ListItemIcon>
               <ListItemText primary={inviteFile.length>0&&inviteFile[0]?.name || inviteFile.length>0&&inviteFile[0]?.file_name} />
             </ListItemButton>

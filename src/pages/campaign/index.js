@@ -18,9 +18,10 @@ import { DeleteOutline, Edit, Send } from '@mui/icons-material'
 import { MaterialReactTable, useMaterialReactTable } from 'material-react-table'
 
 // api hook
-import { apiDelete, apiGet, apiGetwithCustomToken, apiPatch, apiPut } from 'src/hooks/axios'
+import { apiDelete, apiGet, apiPatch, apiPut } from 'src/hooks/axios'
 import {
     baseURL,
+  chatwiseCampaignsUrl,
   deleteTemplateInputList,
   deleteTemplateListWA,
   getnotification,
@@ -44,8 +45,6 @@ function CampaignTemplateList({ RowData }) {
   const [dopen, setdOpen] = useState(false)
   const [delId, setdelId] = useState('')
   const [delLoading, setDelLoading] = useState(false)
-  const baseBluewaabaURL = process.env.BLUEWAABA_URL
-  const baseBluewaabaToken = process.env.BLUEWAABA_TOKEN
 
 
 
@@ -181,10 +180,9 @@ function CampaignTemplateList({ RowData }) {
   const fetchData = async () => {
     //fetch data from the api and set it to the state
     try {
-      const response = await apiGetwithCustomToken(`${baseBluewaabaURL}/campaign?page=${'1'}`,baseBluewaabaToken)
-      
+      const response = await apiGet(`${chatwiseCampaignsUrl}?page=1`)
 
-      console.log('bluewwaba Templates:',response?.data?.data,response?.data?.data?.campaignList?.data)
+      console.log('ChatWise campaigns:', response?.data?.data?.campaignList?.data)
       setContactsFunctionAll(response?.data?.data?.campaignList?.data || [])
       // // setData(response.data) // assuming response.data contains the array of templates
     } catch (error) {

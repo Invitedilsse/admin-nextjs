@@ -24,6 +24,7 @@ const defineRulesFor = (role, subject) => {
     can('manage','ocrmanage')
      can('manage','websiteredirect')
     can('manage','remindermanage')
+    can('manage','familydocuments')
     can('manage','whatsappbot')
 
 
@@ -68,6 +69,7 @@ const defineRulesFor = (role, subject) => {
     can('manage','ocrmanage')
      can('manage','websiteredirect')
     can('manage','remindermanage')
+    can('manage','familydocuments')
     can('manage','whatsappbot')
 
 

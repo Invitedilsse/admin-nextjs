@@ -227,3 +227,32 @@ export const waBotBlockedUrl = `${baseURL}whatsapp-bot/blocked`
 export const waBotBlockHistoryUrl = `${baseURL}whatsapp-bot/block-history`
 export const waBotBlockUrl = `${baseURL}whatsapp-bot/block`
 export const waBotUnblockUrl = `${baseURL}whatsapp-bot/unblock`
+
+// ── Personalised PDF campaigns ────────────────────────────────────────────
+// A template is a PDF plus the boxes drawn on it; a batch is one run of a
+// template over one guest list. The export is what feeds the WhatsApp send.
+export const pdfTemplateUrl = `${baseURL}pdf-campaign/template`
+export const pdfTemplateFileUrl = id => `${baseURL}pdf-campaign/template/${id}/file`
+export const pdfTemplateFieldsUrl = id => `${baseURL}pdf-campaign/template/${id}/fields`
+export const pdfTemplatePreviewUrl = id => `${baseURL}pdf-campaign/template/${id}/preview`
+export const pdfBatchUrl = `${baseURL}pdf-campaign/batch`
+export const pdfBatchRowsUrl = id => `${baseURL}pdf-campaign/batch/${id}/rows`
+export const pdfBatchRetryUrl = id => `${baseURL}pdf-campaign/batch/${id}/retry`
+export const pdfBatchExportUrl = id => `${baseURL}pdf-campaign/batch/${id}/export`
+
+// ── ChatWise, through our own API ─────────────────────────────────────────
+// These used to be called from the browser, straight at the WhatsApp panel,
+// with its bearer token inlined into the bundle. They go through admin-nodejs
+// now: the portal's own login authorises them and the panel token stays on the
+// server.
+export const chatwiseTemplatesUrl = `${baseURL}chatwise/templates`
+export const chatwiseTemplateUrl = uid => `${baseURL}chatwise/template/${uid}`
+export const chatwiseGroupsUrl = `${baseURL}chatwise/groups`
+export const chatwiseCampaignsUrl = `${baseURL}chatwise/campaigns`
+export const chatwiseCampaignStatusUrl = uid => `${baseURL}chatwise/campaign-status/${uid}`
+export const chatwiseCampaignRecipientsUrl = uid => `${baseURL}chatwise/campaign-recipients/${uid}`
+export const chatwiseScheduleUrl = `${baseURL}chatwise/campaign/schedule`
+export const chatwiseHealthUrl = `${baseURL}chatwise/health`
+export const pdfSendInspectUrl = `${baseURL}pdf-campaign/send/inspect`
+export const pdfSendUrl = `${baseURL}pdf-campaign/send`
+export const pdfSendListUrl = `${baseURL}pdf-campaign/send`

@@ -206,7 +206,7 @@ const NotificationsDispatch = ({ isOpen }) => {
                 sx={{ fontSize: '18px' }}
               >
                 {' '}
-                <Icon icon='ic:outline-delete' color='error' />
+                <Icon icon='tabler:trash' color='error' />
               </IconButton>
             </Tooltip>
           }
@@ -297,7 +297,7 @@ const NotificationsDispatch = ({ isOpen }) => {
                   input: {
                     endAdornment: (
                       <IconButton onClick={() => setSearchText(tempSearchText)}>
-                        <Icon icon='fluent:search-20-regular' width={20} height={20} />
+                        <Icon icon='tabler:search' width={20} height={20} />
                       </IconButton>
                     )
                   },

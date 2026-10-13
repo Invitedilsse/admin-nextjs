@@ -383,7 +383,7 @@ const RegisterV1 = () => {
         <Card>
           <CardContent sx={{ p: theme => `${theme.spacing(10.5, 8, 8)} !important` }}>
             <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <img height={62} width={'auto'} alt='add-role' src='/images/logo_long_trans.png' />
+              <img height={96} width={'auto'} alt='Invite Dilsse' src='/images/invite-dilsse-lockup.png' />
             </Box>
             <Box
               sx={{ mb: 6, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}

@@ -56,7 +56,7 @@ const UserLayout = ({ children, contentHeightFixed }) => {
             //       {
             //         title: 'Admin panel',
             //         path: '/admin-panel',
-            //         icon: 'ri:calendar-todo-fill',
+            //         icon: 'tabler:calendar-event',
             //         action: 'read',
             //         subject: 'accatee'
             //       }

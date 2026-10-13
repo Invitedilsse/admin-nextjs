@@ -36,7 +36,7 @@ const VerticalNavSectionTitle = props => {
         sx={{
           ...(navCollapsed && !navHover
             ? { py: 0.5, px: (collapsedNavWidth - navigationBorderWidth - 22) / 8 }
-            : { px: 7.5 }),
+            : { px: 6 }),
           '& .MuiTypography-root, & svg': {
             color: 'text.disabled'
           }
@@ -45,7 +45,7 @@ const VerticalNavSectionTitle = props => {
         {navCollapsed && !navHover ? (
           <Icon icon='tabler:separator' />
         ) : (
-          <Typography noWrap variant='caption' sx={{ textTransform: 'uppercase' }}>
+          <Typography noWrap variant='overline'>
             <Translations text={item.sectionTitle} />
           </Typography>
         )}

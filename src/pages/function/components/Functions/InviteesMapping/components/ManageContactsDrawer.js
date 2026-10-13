@@ -204,7 +204,7 @@ const SideBarGiftType = props => {
                 color: 'text.primary',
                 backgroundColor: 'action.selected',
                 '&:hover': {
-                  backgroundColor: theme => `rgba(${theme.palette.customColors.main}, 0.16)`
+                  backgroundColor: theme => `rgba(${theme.palette.customColors.mainRgb}, 0.16)`
                 }
               }}
             >
@@ -394,7 +394,7 @@ const SideBarGiftType = props => {
                         backgroundColor: theme => `rgba(${theme.palette.primary.main}, 0.08)`
                       }}
                     >
-                      <Icon icon='vscode-icons:file-type-excel' fontSize='1.75rem' />
+                      <Icon icon='tabler:file-spreadsheet' fontSize='1.75rem' />
                     </Box>
                     <Typography variant='h6' sx={{ mb: 2.5 }}>
                       Drop Excel here or click to add.

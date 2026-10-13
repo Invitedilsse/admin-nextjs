@@ -719,14 +719,14 @@ const BasicInfo = props => {
                     p: '0.438rem',
                     borderRadius: 1,
                     '&:hover': {
-                      backgroundColor: theme => `rgba(${theme.palette.customColors.main}, 0.16)`
+                      backgroundColor: theme => `rgba(${theme.palette.customColors.mainRgb}, 0.16)`
                     }
                   }}
                   onClick={handleClose}
                   variant='outlined'
                   size='small'
                 >
-                  <Icon icon='famicons:arrow-back-outline' fontSize={20} />
+                  <Icon icon='tabler:arrow-left' fontSize={20} />
                 </IconButton>
                 <Typography variant='h5'>
                   {functionId !== '' ? 'Edit Function - ' + functionName : 'Create Function'}
@@ -738,7 +738,7 @@ const BasicInfo = props => {
                     p: '0.438rem',
                     borderRadius: 1,
                     '&:hover': {
-                      backgroundColor: theme => `rgba(${theme.palette.customColors.main}, 0.16)`
+                      backgroundColor: theme => `rgba(${theme.palette.customColors.mainRgb}, 0.16)`
                     }
                   }}
                   onClick={() => setIsEdit(!isEdit)}
@@ -1296,7 +1296,7 @@ const BasicInfo = props => {
                                     {isLoading ? (
                                       <CircularProgress size={24} color='inherit' />
                                     ) : (
-                                      <Icon icon='lsicon:view-outline' fontSize='1.75rem' color='grey' />
+                                      <Icon icon='tabler:eye' fontSize='1.75rem' color='grey' />
                                     )}
                                   </IconButton>
                                   {/* <IconButton
@@ -1319,7 +1319,7 @@ const BasicInfo = props => {
                                       }
                                     }}
                                   >
-                                    <Icon icon='lsicon:view-outline' fontSize='1.75rem' color='grey' />
+                                    <Icon icon='tabler:eye' fontSize='1.75rem' color='grey' />
                                   </IconButton> */}
                                   <IconButton
                                     edge='end'
@@ -1339,14 +1339,14 @@ const BasicInfo = props => {
                                       // )
                                     }}
                                   >
-                                    <Icon icon='ic:twotone-delete' fontSize='1.75rem' color='red' />
+                                    <Icon icon='tabler:trash' fontSize='1.75rem' color='red' />
                                   </IconButton>
                                 </>
                               }
                             >
                               <ListItemButton>
                                 <ListItemIcon>
-                                  <Icon icon='mingcute:invite-line' fontSize='1.75rem' />
+                                  <Icon icon='tabler:send' fontSize='1.75rem' />
                                 </ListItemIcon>
                                 <ListItemText
                                   primary={

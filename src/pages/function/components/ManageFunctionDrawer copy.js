@@ -302,7 +302,7 @@ const SideBarOccasion = props => {
               sx={{ borderRadius: 50, backgroundColor: 'rgba(0,0,0,0.2)' }}
               onClick={() => handleRemoveFile(file)}
             >
-              <Icon icon='ic:twotone-delete' fontSize={24} color='red' />
+              <Icon icon='tabler:trash' fontSize={24} color='red' />
             </IconButton>
           </Box>
         }
@@ -478,7 +478,7 @@ const SideBarOccasion = props => {
                 color: 'text.primary',
                 backgroundColor: 'action.selected',
                 '&:hover': {
-                  backgroundColor: theme => `rgba(${theme.palette.customColors.main}, 0.16)`
+                  backgroundColor: theme => `rgba(${theme.palette.customColors.mainRgb}, 0.16)`
                 }
               }}
             >

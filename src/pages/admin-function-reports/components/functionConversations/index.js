@@ -90,7 +90,7 @@ const MemberChip = ({ member }) => {
                 ({member.message_count})
               </Box>
             ) : null}
-            {!member.can_comment ? <Icon icon='mdi:comment-off-outline' fontSize={13} /> : null}
+            {!member.can_comment ? <Icon icon='tabler:message-off' fontSize={13} /> : null}
           </Stack>
         }
         sx={{ mb: 1, mr: 1, textDecoration: member.is_removed ? 'line-through' : 'none' }}
@@ -223,13 +223,13 @@ const FunctionConversations = ({ RowData, functionDetails }) => {
         <Stack direction='row' spacing={2}>
           <Button
             variant='outlined'
-            startIcon={<Icon icon='mdi:file-excel-outline' />}
+            startIcon={<Icon icon='tabler:file-spreadsheet' />}
             onClick={handleExport}
             disabled={exporting || !threads.length}
           >
             {exporting ? 'Exporting…' : 'Export Excel'}
           </Button>
-          <Button variant='outlined' startIcon={<Icon icon='mdi:refresh' />} onClick={fetchThreads}>
+          <Button variant='outlined' startIcon={<Icon icon='tabler:refresh' />} onClick={fetchThreads}>
             Refresh
           </Button>
         </Stack>
@@ -262,7 +262,7 @@ const FunctionConversations = ({ RowData, functionDetails }) => {
             input: {
               endAdornment: (
                 <IconButton size='small' onClick={() => setSearch(tempSearch)}>
-                  <Icon icon='fluent:search-20-regular' width={20} height={20} />
+                  <Icon icon='tabler:search' width={20} height={20} />
                 </IconButton>
               )
             }
@@ -311,7 +311,7 @@ const FunctionConversations = ({ RowData, functionDetails }) => {
       ) : visibleThreads.length === 0 ? (
         <Card sx={{ borderRadius: 3 }}>
           <CardContent sx={{ textAlign: 'center', py: 6 }}>
-            <Icon icon='mdi:chat-outline' fontSize={40} />
+            <Icon icon='tabler:message-circle' fontSize={40} />
             <Typography color='text.secondary' mt={1}>
               {threads.length === 0
                 ? 'No family chat has started on this function yet.'
@@ -394,17 +394,17 @@ const FunctionConversations = ({ RowData, functionDetails }) => {
                         <Stack direction='row' spacing={1} flexWrap='wrap'>
                           <Chip
                             size='small'
-                            icon={<Icon icon='mdi:message-text-outline' fontSize={15} />}
+                            icon={<Icon icon='tabler:message-2' fontSize={15} />}
                             label={`${thread.message_count} messages`}
                           />
                           <Chip
                             size='small'
-                            icon={<Icon icon='mdi:paperclip' fontSize={15} />}
+                            icon={<Icon icon='tabler:paperclip' fontSize={15} />}
                             label={`${thread.media_count} media`}
                           />
                           <Chip
                             size='small'
-                            icon={<Icon icon='mdi:reply-outline' fontSize={15} />}
+                            icon={<Icon icon='tabler:corner-up-left' fontSize={15} />}
                             label={`${thread.reply_count} replies`}
                           />
                           <Chip
@@ -438,7 +438,7 @@ const FunctionConversations = ({ RowData, functionDetails }) => {
                         <Button
                           variant='contained'
                           size='small'
-                          startIcon={<Icon icon='mdi:chat-processing-outline' />}
+                          startIcon={<Icon icon='tabler:message-circle' />}
                           onClick={() => setOpenId(thread.conversation_id)}
                           disabled={thread.message_count === 0 && thread.member_count === 0}
                         >

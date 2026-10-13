@@ -32,7 +32,7 @@ const CustomRadioIcons = props => {
                   borderColor: `${color}.main`,
                   '& svg': { color: theme => `${theme.palette.primary.main} !important` }
                 }
-              : { '&:hover': { borderColor: theme => `rgba(${theme.palette.customColors.main}, 0.25)` } })
+              : { '&:hover': { borderColor: theme => `rgba(${theme.palette.customColors.mainRgb}, 0.25)` } })
           }}
         >
           {icon ? <Icon icon={icon} {...iconProps} /> : null}

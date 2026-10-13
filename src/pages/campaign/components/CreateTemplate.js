@@ -18,10 +18,14 @@ import {
 import { LoadingButton } from '@mui/lab'
 import Icon from 'src/@core/components/icon'
 import toast from 'react-hot-toast'
-import { apiPost, apiPatch, apiGetwithCustomToken, apiPostWithCustomToken } from 'src/hooks/axios'
+import { apiGet, apiPost, apiPatch } from 'src/hooks/axios'
 import {
   addTemplateListWA,
   baseURL,
+  chatwiseTemplatesUrl,
+  chatwiseTemplateUrl,
+  chatwiseGroupsUrl,
+  chatwiseScheduleUrl,
   patchTemplateInputList,
   postTemplateInputList,
   updateTempalateListWA
@@ -36,9 +40,17 @@ import { LocalizationProvider, DateTimePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 
+/**
+ * How many templates to ask for at a time.
+ *
+ * page_size is what the ChatWise collection calls it. Twenty-five fills the
+ * dropdown on a first open without a second round trip, and is small enough
+ * that an account with hundreds of templates does not pull them all down to
+ * show five.
+ */
+const TEMPLATE_PAGE_SIZE = 25
+
 const CreateTemplateCampaign = ({ open, toggle, id, RowData, fetchTable, functionId }) => {
-  const baseBluewaabaURL = process.env.BLUEWAABA_URL
-  const baseBluewaabaToken = process.env.BLUEWAABA_TOKEN
   const [templates, setTemplates] = useState([])
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
@@ -84,21 +96,29 @@ const CreateTemplateCampaign = ({ open, toggle, id, RowData, fetchTable, functio
     try {
       setLoading(true)
 
-      // Replace with your API
-      const response = await apiGetwithCustomToken(
-        `${baseBluewaabaURL}/contact/template-list?page=${page}`,
-        baseBluewaabaToken
+      // pageNo, not the `page` state.
+      //
+      // This asked for `page` — the state variable — while every other line in
+      // the function used the pageNo argument. So "load more" fetched whatever
+      // page the state happened to hold and appended it again: the same rows,
+      // twice, and never the next ones.
+      const response = await apiGet(
+        `${chatwiseTemplatesUrl}?page=${pageNo}&page_size=${TEMPLATE_PAGE_SIZE}`
       )
 
-      console.log('bluewwaba Templates:', response?.data?.data, response?.data?.data?.templateList?.data)
+      const list = response?.data?.data?.templateList
+      console.log('ChatWise templates:', list?.data)
 
       if (pageNo === 1) {
-        setTemplates(response?.data?.data?.templateList?.data)
+        setTemplates(list?.data || [])
       } else {
-        setTemplates(prev => [...prev, ...response?.data?.data?.templateList?.data])
+        setTemplates(prev => [...prev, ...(list?.data || [])])
       }
 
-      setHasMore(response?.data?.data?.templateList?.current_page <= response?.data?.data?.templateList?.current_page)
+      // This compared current_page with ITSELF, which is true for every page
+      // there has ever been — so "there is more" never became false and the
+      // list would keep asking for pages past the end.
+      setHasMore(Number(list?.current_page || 0) < Number(list?.last_page || 0))
     } catch (err) {
       console.error(err)
     } finally {
@@ -108,10 +128,7 @@ const CreateTemplateCampaign = ({ open, toggle, id, RowData, fetchTable, functio
 
   const filtertemplateDetails = async id => {
     // const details = templates.find(item=>item._uid === id)
-    const response = await apiGetwithCustomToken(
-      `${baseBluewaabaURL}/contact/get-template-details/${id}`,
-      baseBluewaabaToken
-    )
+    const response = await apiGet(chatwiseTemplateUrl(id))
     console.log(
       'details of selecte temp----->',
       response.data?.data,
@@ -235,10 +252,9 @@ const CreateTemplateCampaign = ({ open, toggle, id, RowData, fetchTable, functio
           "field_5": "abdulkalam"
       }
      
-     const response = await apiPostWithCustomToken(
-        `${baseBluewaabaURL}/campaign/schedule`,data,
-        baseBluewaabaToken
-      )
+     // Through our own API, with our own login. The server never retries this
+     // one: a repeated schedule is a second campaign and a second charge.
+     const response = await apiPost(chatwiseScheduleUrl, data)
       console.log("Schedule response:",response)
       if(response.status==200 && response.data.data.campaignUid){
         toast.success('Campaign scheduled successfully')
@@ -295,12 +311,16 @@ const CreateTemplateCampaign = ({ open, toggle, id, RowData, fetchTable, functio
 
   const loadTemplateOptions = async (inputValue, loadedOptions, { page }) => {
     try {
-      const response = await apiGetwithCustomToken(
-        `${baseBluewaabaURL}/contact/template-list?page=${page}&search=${inputValue}`,
-        baseBluewaabaToken
+      // search_term is the name the published collection gives it; the helper
+      // on the server sends both spellings, so `search` here is understood
+      // either way.
+      const response = await apiGet(
+        `${chatwiseTemplatesUrl}?page=${page}&page_size=${TEMPLATE_PAGE_SIZE}` +
+        `&search=${encodeURIComponent(inputValue || '')}`
       )
 
-      const data = response?.data?.data?.templateList?.data || []
+      const list = response?.data?.data?.templateList
+      const data = list?.data || []
 
       const options = data.map(item => ({
         label: item.template_name,
@@ -310,7 +330,12 @@ const CreateTemplateCampaign = ({ open, toggle, id, RowData, fetchTable, functio
 
       return {
         options,
-        hasMore: data.length > 0,
+        // The panel's own last_page when it gives one. A full page is the
+        // fallback: "the rows kept coming" is a weaker signal than being told
+        // where the end is, but it beats stopping one page early.
+        hasMore: list?.last_page
+          ? Number(list.current_page) < Number(list.last_page)
+          : data.length >= TEMPLATE_PAGE_SIZE,
         additional: {
           page: page + 1
         }
@@ -326,9 +351,8 @@ const CreateTemplateCampaign = ({ open, toggle, id, RowData, fetchTable, functio
 
   const loadTemplateOptionscontacts = async (inputValue, loadedOptions, { page }) => {
     try {
-      const response = await apiGetwithCustomToken(
-        `${baseBluewaabaURL}/contact/groups?page=${page}&search=${inputValue}`,
-        baseBluewaabaToken
+      const response = await apiGet(
+        `${chatwiseGroupsUrl}?page=${page}&search=${encodeURIComponent(inputValue || '')}`
       )
 
       const data = response?.data?.data?.contactList?.data || []

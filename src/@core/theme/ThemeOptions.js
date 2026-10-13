@@ -40,7 +40,9 @@ const themeOptions = (settings, overrideMode) => {
       palette: palette(mode === 'semi-dark' ? overrideMode : mode, skin),
       ...spacing,
       shape: {
-        borderRadius: 6
+        // ** Controls are 8. Cards and dialogs step up from here in
+        //    overrides/refinements.js.
+        borderRadius: 8
       },
       mixins: {
         toolbar: {

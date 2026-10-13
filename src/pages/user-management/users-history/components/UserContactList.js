@@ -732,7 +732,7 @@ const UserContactList = ({ userId }) => {
                     setSearch(tempSearch)
                   }}
                 >
-                  <Icon icon='fluent:search-20-regular' width={20} height={20} />
+                  <Icon icon='tabler:search' width={20} height={20} />
                 </IconButton>
               )
             }
@@ -793,7 +793,7 @@ const UserContactList = ({ userId }) => {
 
       {!loading && rows.length === 0 && !error ? (
         <Box sx={{ py: 6, textAlign: 'center' }}>
-          <Icon icon='mdi:account-multiple-outline' fontSize={38} />
+          <Icon icon='tabler:users' fontSize={38} />
           <Typography color='text.secondary' mt={1}>
             {search || source
               ? 'No guest matches this filter.'

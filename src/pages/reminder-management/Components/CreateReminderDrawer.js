@@ -188,7 +188,7 @@ const CreateReminderDrawer = ({ open, toggle, onCreated }) => {
       <Header>
         <Typography variant='h6'>Create Reminder</Typography>
         <IconButton size='small' onClick={toggle}>
-          <Icon icon='mdi:close' fontSize={20} />
+          <Icon icon='tabler:x' fontSize={20} />
         </IconButton>
       </Header>
 

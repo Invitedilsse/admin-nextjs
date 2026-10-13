@@ -80,7 +80,7 @@ const UserReminderDrawer = ({ open, user, rangeQuery, toggle, onOpenReminder }) 
           </Typography>
         </Box>
         <IconButton size='small' onClick={toggle}>
-          <Icon icon='mdi:close' fontSize={20} />
+          <Icon icon='tabler:x' fontSize={20} />
         </IconButton>
       </Header>
 

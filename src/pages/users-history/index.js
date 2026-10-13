@@ -9,10 +9,12 @@ import {
   Divider,
   TextField,
   IconButton,
-  Icon,
   Button,
   Popover
-} from '@mui/material';
+} from '@mui/material'
+
+// ** Iconify's Icon, not @mui/material's: only this one has an `icon` prop.
+import Icon from 'src/@core/components/icon';
 
 import { Box } from '@mui/system';
 import { Visibility } from '@mui/icons-material';
@@ -24,6 +26,10 @@ import { format } from 'date-fns';
 
 import { apiGet } from 'src/hooks/axios';
 import { baseURL } from 'src/services/pathConst';
+
+// ** The portal's shared list-page chrome. See the header comments in each file.
+import { PageToolbar, EmptyState } from 'src/@core/components/list-page'
+import { tableDefaults } from 'src/@core/components/mui/react-table-defaults'
 
 
 const UsersHistory = ({}) => {
@@ -117,6 +123,9 @@ console.log("startdate----->",startdate,"endDate----->",endDate)
   ]
 
   const table = useMaterialReactTable({
+    // ** One table look for the whole portal. This page's own options below
+    //    still win, because they are spread after these.
+    ...tableDefaults,
     columns: generateColumns({
       onTemplateClick: fetchuserData
     }),
@@ -143,7 +152,22 @@ console.log("startdate----->",startdate,"endDate----->",endDate)
     enableColumnOrdering: false,
     enableFullScreenToggle: false,
     enableDensityToggle: false,
-    enableColumnActions: false
+    enableColumnActions: false,
+
+    // ** An empty table with headers and no rows reads exactly like a failed
+    //    request. Say which it is, and say it differently when a search is the
+    //    reason there is nothing to show.
+    renderEmptyRowsFallback: () => (
+      <EmptyState
+        icon='tabler:users'
+        title={searchText ? 'Nothing matches that search' : 'No users in this date range'}
+        description={
+          searchText
+            ? 'Try a shorter search, or clear it to see everything in the range.'
+            : 'Widen the date range, or clear the filter to see everything.'
+        }
+      />
+    )
   })
 
     const handleDateChange = ranges => {
@@ -158,103 +182,113 @@ console.log("startdate----->",startdate,"endDate----->",endDate)
     setEndDate(format(edate, "yyyy-MM-dd"))
   }
 
+
+  // ** These dates are legitimately '' when no range is set, and format() throws on
+  //    that, so every read of them goes through here.
+  const asDay = value => {
+    if (!value) return null
+    try {
+      return format(new Date(value), 'dd MMM yyyy')
+    } catch (e) {
+      return null
+    }
+  }
+
+  const from = asDay(selectionRange.startDate)
+  const to = asDay(selectionRange.endDate)
+  const rangeLabel = from && to ? `${from} - ${to}` : 'Any date'
+
+  const clearDates = () => {
+    setStartDate('')
+    setEndDate('')
+    setSelectionRange({ startDate: '', endDate: '', key: 'selection' })
+  }
+
+  const clearSearch = () => {
+    setSearchText('')
+    setTempSearchText('')
+  }
+
+  // ** What is actually narrowing this list, shown rather than hidden behind a
+  //    button that looks the same whether anything is filtered or not.
+  const filterChips = [
+    from && to ? { label: rangeLabel, onDelete: clearDates } : null,
+    searchText ? { label: `"${searchText}"`, onDelete: clearSearch } : null
+  ].filter(Boolean)
+
+  const clearFilters = () => {
+    clearDates()
+    clearSearch()
+  }
+
   return (
     <>
       <Grid2 container spacing={6}>
-        <Card
-          sx={{
-            boxShadow: 'rgba(0, 0, 0, 0.2) 0px 0px 3px 0px'
-          }}
-        >
-          <CardHeader
-            title='Users List'
-            sx={{
-              '& .MuiTypography-root ': {}
-            }}
-          />
-          <Divider sx={{ m: '0 !important' }} />
-          <Grid2 container spacing={2} px={4} display={'flex'} justifyContent={'end'}>
-            <Grid2 size={{ xs: 12, lg: 6, md: 6, sm: 12 }}>
-              <TextField
-                variant='outlined'
-                size='small'
-                value={tempSearchText}
-                fullWidth
-                sx={{ mr: 4 }}
-                placeholder='Search Contacts'
-                onChange={e => handleDebouncedSearch(e.target.value)}
-                onKeyDown={ev => {
-                  if (ev.key === 'Enter') {
-                    ev.preventDefault()
-                    setSearchText(tempSearchText)
-                  }
-                }}
-                slotProps={{
-                  input: {
-                    endAdornment: (
-                      <IconButton onClick={() => setSearchText(tempSearchText)}>
-                        <Icon icon='fluent:search-20-regular' width={20} height={20} />
-                      </IconButton>
-                    )
-                  }
-                }}
-              />
-            </Grid2>
-            <Grid2 size={{ xs: 12, lg: 4, md: 4, sm: 12 }}>
-                       {/* DATE RANGE BUTTON */}
-              <Button
-                // variant={filType === "custom"?"contained":"outlined"}
-                variant={"contained"}
-                onClick={e => {
-                  // setFiltype("custom")
-                  setAnchorEl(e.currentTarget)
-                }}
-              >
-              {selectionRange.startDate ? format(selectionRange.startDate, "dd MMM yyyy") : 'Start Date'} -{" "}
-              {selectionRange.endDate   ? format(selectionRange.endDate,   "dd MMM yyyy") : 'End Date'}
-              </Button>
-
-            {/* DATE RANGE PICKER */}
-            <Popover
-              open={Boolean(anchorEl)}
-              anchorEl={anchorEl}
-              onClose={() => setAnchorEl(null)}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "right"
+        <Grid2 size={{ xs: 12 }}>
+        <Card>
+          <PageToolbar
+          title='Users List'
+          count={isdataloading ? undefined : totalcount}
+          search={
+            <TextField
+              size='small'
+              variant='outlined'
+              value={tempSearchText}
+              sx={{ width: { xs: '100%', sm: 280 } }}
+              placeholder='Search Contacts'
+              onChange={e => handleDebouncedSearch(e.target.value)}
+              onKeyDown={ev => {
+                if (ev.key === 'Enter') {
+                  ev.preventDefault()
+                  setSearchText(tempSearchText)
+                }
               }}
-            >
-              <DateRange
-                ranges={[selectionRange]}
-                onChange={handleDateChange}
-                moveRangeOnFirstSelection={false}
-              />
-            </Popover>
-            </Grid2>
-             <Grid2 size={{ xs: 12, lg: 4, md: 4, sm: 12 }}>
-                       {/* DATE RANGE BUTTON */}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <Box sx={{ mr: 2, display: 'flex', alignItems: 'center', color: 'text.disabled' }}>
+                      <Icon icon='tabler:search' fontSize='1.125rem' />
+                    </Box>
+                  ),
+                  endAdornment: tempSearchText ? (
+                    <IconButton size='small' aria-label='Search' onClick={() => setSearchText(tempSearchText)}>
+                      <Icon icon='tabler:arrow-right' fontSize='1.125rem' />
+                    </IconButton>
+                  ) : null
+                }
+              }}
+            />
+          }
+          actions={
+            <>
               <Button
-                // variant={filType === "custom"?"contained":"outlined"}
-                variant={"contained"}
-                onClick={e => {
-                  // setFiltype("custom")
-                  setStartDate('')
-                  setEndDate('')
-                  setSelectionRange({
-                    startDate:'',
-                    endDate:'',
-                    key:'selection'
-                  })
-                }}
-              >
-                clear filter
-              </Button>
-            </Grid2>
-          </Grid2>
-          <Box p={4} mt={4}>
-            <MaterialReactTable table={table} />
-          </Box>
+              size='small'
+              variant='outlined'
+              color='secondary'
+              startIcon={<Icon icon='tabler:calendar' />}
+              onClick={e => setAnchorEl(e.currentTarget)}
+            >
+              {rangeLabel}
+            </Button>
+            </>
+          }
+          filters={filterChips}
+          onClearFilters={clearFilters}
+        />
+
+        <Popover
+          open={Boolean(anchorEl)}
+          anchorEl={anchorEl}
+          onClose={() => setAnchorEl(null)}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        >
+          <DateRange ranges={[selectionRange]} onChange={handleDateChange} moveRangeOnFirstSelection={false} />
+        </Popover>
+
+        <MaterialReactTable table={table} />
         </Card>
+        </Grid2>
       </Grid2>
     </>
   )

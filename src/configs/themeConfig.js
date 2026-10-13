@@ -21,7 +21,7 @@ const themeConfig = {
   navSubItemIcon: 'tabler:circle' /* Icon */,
   verticalNavToggleType: 'accordion' /* accordion | collapse /*! Note: This is for Vertical navigation menu only */,
   navCollapsed: false /* true | false /*! Note: This is for Vertical navigation menu only */,
-  navigationSize: 260 /* Number in px(Pixels) /*! Note: This is for Vertical navigation menu only */,
+  navigationSize: 268 /* Number in px(Pixels) /*! Note: This is for Vertical navigation menu only */,
   collapsedNavigationSize: 82 /* Number in px(Pixels) /*! Note: This is for Vertical navigation menu only */,
   afterVerticalNavMenuContentPosition: 'fixed' /* fixed | static */,
   beforeVerticalNavMenuContentPosition: 'fixed' /* fixed | static */,
@@ -29,7 +29,9 @@ const themeConfig = {
   horizontalMenuAnimation: true /* true | false */,
   // ** AppBar Configs
   appBar: 'fixed' /* fixed | static | hidden /*! Note: hidden value will only work for Vertical Layout */,
-  appBarBlur: true /* true | false */,
+  // ** The header is a flush, solid bar now. Blurring a white page behind a
+  //    white bar costs a compositing layer and shows nothing.
+  appBarBlur: false /* true | false */,
   // ** Other Configs
   responsiveFontSizes: false /* true | false */,
   disableRipple: false /* true | false */,

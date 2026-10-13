@@ -325,7 +325,7 @@ const SideBarGiftType = props => {
                   sx={{ fontSize: '18px' }}
                 >
                   {' '}
-                  <Icon icon='mdi:remove' color='error' />
+                  <Icon icon='tabler:minus' color='error' />
                 </IconButton>
               </Tooltip>
             }
@@ -437,7 +437,7 @@ const SideBarGiftType = props => {
     //               sx={{ fontSize: '18px' }}
     //             >
     //               {' '}
-    //               <Icon icon='mdi:remove' color='error' />
+    //               <Icon icon='tabler:minus' color='error' />
     //             </IconButton>
     //   </>)}
     // },
@@ -808,7 +808,7 @@ const SideBarGiftType = props => {
                 color: 'text.primary',
                 backgroundColor: 'action.selected',
                 '&:hover': {
-                  backgroundColor: theme => `rgba(${theme.palette.customColors.main}, 0.16)`
+                  backgroundColor: theme => `rgba(${theme.palette.customColors.mainRgb}, 0.16)`
                 }
               }}
             >
@@ -844,7 +844,7 @@ const SideBarGiftType = props => {
                     input: {
                       endAdornment: (
                         <IconButton onClick={() => setSearchText(tempSearchText)}>
-                          <Icon icon='fluent:search-20-regular' width={20} height={20} />
+                          <Icon icon='tabler:search' width={20} height={20} />
                         </IconButton>
                       )
                     }

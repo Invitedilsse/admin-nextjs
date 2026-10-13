@@ -117,7 +117,7 @@ const OcrNewVenuesPage = () => {
           variant='contained'
           onClick={handleExport}
           disabled={exporting || selected.size === 0}
-          startIcon={<Icon icon='mdi:database-export-outline' />}
+          startIcon={<Icon icon='tabler:database-export' />}
           sx={{ background: '#1D6F42', '&:hover': { background: '#155932' } }}
         >
           {exporting ? 'Exporting...' : `Export ${selected.size || ''} to main list`}
@@ -157,7 +157,7 @@ const OcrNewVenuesPage = () => {
                   <Box component='td' sx={{ p: '6px 10px', borderBottom: '1px solid #f0f0f0', color: '#555' }}>{address || '—'}</Box>
                   <Box component='td' sx={{ p: '6px 10px', borderBottom: '1px solid #f0f0f0' }}>
                     <Link href={mapsLink(r.venue_name)} target='_blank' rel='noopener' sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, color: '#1a73e8', fontSize: 12 }}>
-                      <Icon icon='mdi:google-maps' fontSize={16} /> Open
+                      <Icon icon='tabler:map-2' fontSize={16} /> Open
                     </Link>
                   </Box>
                   <Box component='td' sx={{ p: '6px 10px', borderBottom: '1px solid #f0f0f0', color: '#888', fontSize: 11, maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.source_file || '—'}</Box>

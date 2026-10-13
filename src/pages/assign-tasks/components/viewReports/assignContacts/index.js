@@ -369,7 +369,7 @@ function ListContactsCallers({RowData,callerId,toggle}) {
                       color: 'text.primary',
                       backgroundColor: 'action.selected',
                       '&:hover': {
-                        backgroundColor: theme => `rgba(${theme.palette.customColors.main}, 0.16)`
+                        backgroundColor: theme => `rgba(${theme.palette.customColors.mainRgb}, 0.16)`
                       }
                     }}
                   >
@@ -401,7 +401,7 @@ function ListContactsCallers({RowData,callerId,toggle}) {
                     input: {
                       endAdornment: (
                         <IconButton onClick={() => setSearchText(tempSearchText)}>
-                          <MuiIcon icon='fluent:search-20-regular' width={20} height={20} />
+                          <MuiIcon icon='tabler:search' width={20} height={20} />
                         </IconButton>
                       )
                     }

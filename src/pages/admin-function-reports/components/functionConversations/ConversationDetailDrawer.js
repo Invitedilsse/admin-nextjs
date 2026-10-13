@@ -101,7 +101,7 @@ const MessageMedia = ({ media, type }) => {
   if (type === 'audio') {
     return (
       <Stack direction='row' spacing={1} alignItems='center' sx={{ mt: 0.75 }}>
-        <Icon icon='mdi:microphone-outline' fontSize={16} />
+        <Icon icon='tabler:microphone' fontSize={16} />
         <Box component='audio' src={media.url} controls sx={{ height: 32, maxWidth: 260 }} />
         {formatDuration(media.duration_ms) ? (
           <Typography variant='caption' color='text.secondary'>
@@ -114,7 +114,7 @@ const MessageMedia = ({ media, type }) => {
 
   return (
     <Stack direction='row' spacing={1} alignItems='center' sx={{ mt: 0.75 }}>
-      <Icon icon={type === 'video' ? 'mdi:video-outline' : 'mdi:paperclip'} fontSize={16} />
+      <Icon icon={type === 'video' ? 'mdi:video-outline' : 'tabler:paperclip'} fontSize={16} />
       <Link href={media.url} target='_blank' rel='noopener' variant='body2'>
         {media.name || (type === 'video' ? 'Video' : 'Document')}
       </Link>
@@ -240,7 +240,7 @@ const ConversationDetailDrawer = ({ open, conversationId, toggle }) => {
           {msg.message_type !== 'text' ? (
             <Tooltip title={MESSAGE_TYPE_LABEL[msg.message_type] || msg.message_type}>
               <Box component='span' sx={{ display: 'inline-flex', color: 'text.secondary' }}>
-                <Icon icon={MESSAGE_TYPE_ICON[msg.message_type] || 'mdi:paperclip'} fontSize={15} />
+                <Icon icon={MESSAGE_TYPE_ICON[msg.message_type] || 'tabler:paperclip'} fontSize={15} />
               </Box>
             </Tooltip>
           ) : null}
@@ -301,7 +301,7 @@ const ConversationDetailDrawer = ({ open, conversationId, toggle }) => {
           </Typography>
         </Box>
         <IconButton size='small' onClick={toggle}>
-          <Icon icon='mdi:close' fontSize={20} />
+          <Icon icon='tabler:x' fontSize={20} />
         </IconButton>
       </Header>
 
@@ -412,7 +412,7 @@ const ConversationDetailDrawer = ({ open, conversationId, toggle }) => {
               <Box sx={{ px: 4, pb: 6, overflowY: 'auto', flex: 1 }}>
                 {messages.length === 0 ? (
                   <Box sx={{ py: 8, textAlign: 'center' }}>
-                    <Icon icon='mdi:chat-outline' fontSize={36} />
+                    <Icon icon='tabler:message-circle' fontSize={36} />
                     <Typography color='text.secondary' mt={1}>
                       Nobody has said anything in this chat yet.
                     </Typography>
@@ -507,10 +507,10 @@ const ConversationDetailDrawer = ({ open, conversationId, toggle }) => {
                         String(a.file_type || '').startsWith('image')
                           ? 'mdi:image-outline'
                           : String(a.file_type || '').startsWith('audio')
-                          ? 'mdi:microphone-outline'
+                          ? 'tabler:microphone'
                           : String(a.file_type || '').startsWith('video')
                           ? 'mdi:video-outline'
-                          : 'mdi:file-document-outline'
+                          : 'tabler:file-text'
                       }
                       fontSize={20}
                     />

@@ -229,13 +229,13 @@ const ReminderManagement = () => {
         <Stack direction='row' spacing={2}>
           <Button
             variant='outlined'
-            startIcon={<Icon icon='mdi:file-excel-outline' />}
+            startIcon={<Icon icon='tabler:file-spreadsheet' />}
             onClick={handleExport}
             disabled={exporting}
           >
             {exporting ? 'Exporting…' : 'Export Excel'}
           </Button>
-          <Button variant='contained' startIcon={<Icon icon='mdi:plus' />} onClick={() => setCreateOpen(true)}>
+          <Button variant='contained' startIcon={<Icon icon='tabler:plus' />} onClick={() => setCreateOpen(true)}>
             Create Reminder
           </Button>
         </Stack>
