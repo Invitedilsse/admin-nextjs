@@ -25,7 +25,11 @@ const defineRulesFor = (role, subject) => {
      can('manage','websiteredirect')
     can('manage','remindermanage')
     can('manage','familydocuments')
+    can('manage','travelplan')
     can('manage','whatsappbot')
+    can('manage','useractivity')
+    can('manage','activeusers')
+    can('manage','sendnotification')
 
 
 
@@ -70,7 +74,11 @@ const defineRulesFor = (role, subject) => {
      can('manage','websiteredirect')
     can('manage','remindermanage')
     can('manage','familydocuments')
+    can('manage','travelplan')
     can('manage','whatsappbot')
+    can('manage','useractivity')
+    can('manage','activeusers')
+    can('manage','sendnotification')
 
 
     accessible.action = 'campaign'

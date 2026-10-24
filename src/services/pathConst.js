@@ -38,6 +38,18 @@ export const reminderDetailUrl = `${baseURL}reminder-management/details`
 export const reminderUserListUrl = `${baseURL}reminder-management/users`
 export const reminderUserDetailUrl = `${baseURL}reminder-management/user`
 export const reminderCreateUrl = `${baseURL}reminder-management/create`
+// Guest Travel Plan (super-admin / main). The import is the only one of these
+// that WRITES to the app database — see admin-nodejs/src/travel-plan/index.js
+// for why the operator is recorded separately from the host.
+export const travelPlanSummaryUrl = `${baseURL}travel-plan/summary`
+export const travelPlanListUrl = `${baseURL}travel-plan/list`
+// One guest: what the assigned caller entered from the phone, who entered it,
+// and the chase history behind it.
+export const travelPlanDetailUrl = `${baseURL}travel-plan/detail`
+export const travelPlanExportUrl = `${baseURL}travel-plan/export`
+export const travelPlanSampleUrl = `${baseURL}travel-plan/sample`
+export const travelPlanImportUrl = `${baseURL}travel-plan/import`
+
 export const reminderExportUrl = `${baseURL}reminder-management/export`
 export const reminderAppUsersUrl = `${baseURL}reminder-management/app-users`
 
@@ -256,3 +268,30 @@ export const chatwiseHealthUrl = `${baseURL}chatwise/health`
 export const pdfSendInspectUrl = `${baseURL}pdf-campaign/send/inspect`
 export const pdfSendUrl = `${baseURL}pdf-campaign/send`
 export const pdfSendListUrl = `${baseURL}pdf-campaign/send`
+
+// What every mobile user did, and when. Written by the phones through
+// IDS_backend/api/activity; read here, never written.
+export const userActivityList = `${baseURL}user-activity/list`
+export const userActivitySummary = `${baseURL}user-activity/summary`
+export const userActivityTimeline = `${baseURL}user-activity/user-timeline`
+export const userActivitySession = `${baseURL}user-activity/session`
+export const userActivityExport = `${baseURL}user-activity/export`
+export const userActivityUserBase = `${baseURL}user-activity/user-base`
+
+// Who still has the app installed, measured by asking the phones. `check` is a
+// POST because it is not a read: it sends a silent push to every device token on
+// record and writes down which ones answered.
+export const activeUsersList = `${baseURL}active-users/list`
+export const activeUsersCheck = `${baseURL}active-users/check`
+
+// Writing a notification and sending it. `send` is the one endpoint in
+// this portal that cannot be undone.
+export const notificationComposerOptions = `${baseURL}notification-composer/options`
+export const notificationComposerFunctions = `${baseURL}notification-composer/functions`
+export const notificationComposerAudience = `${baseURL}notification-composer/audience`
+export const notificationComposerHistory = `${baseURL}notification-composer/history`
+export const notificationComposerSend = `${baseURL}notification-composer/send`
+
+// The portal's own uploader. Answers with a permanent S3 url, which is what
+// a notification banner needs - a presigned one dies after seven days.
+export const adminUploadDoc = `${baseURL}admin/upload-doc`

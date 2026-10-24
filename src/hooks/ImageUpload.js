@@ -9,6 +9,8 @@ import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
 import FormHelperText from '@mui/material/FormHelperText'
 import IconButton from '@mui/material/IconButton'
+import CircularProgress from '@mui/material/CircularProgress'
+import Typography from '@mui/material/Typography'
 import { styled } from '@mui/material/styles'
 import 'cropperjs/dist/cropper.css'
 import React, { useEffect, useState } from 'react'
@@ -87,12 +89,76 @@ function ImageUpload({
 }) {
   // const { t } = useTranslation();
   const [image, setImage] = useState()
+  // Bumped every time the picture changes, and used as the <Cropper> key, so
+  // each picture gets a brand new cropper instance instead of an old one being
+  // asked to swap its image.
+  const [imageKey, setImageKey] = useState(0)
+  const [status, setStatus] = useState('idle') // idle | loading | ready | error
   const [cropper, setCropper] = useState()
   const [openConfirm, setConfirm] = React.useState(false)
 
+  // One place to swap the picture, so the instance counter can never drift
+  // from the image it belongs to.
+  const applyImage = src => {
+    setImage(src)
+    setImageKey(k => k + 1)
+    setStatus('ready')
+  }
+
+  // Why this is no longer just `setImage(selectedImage)`.
+  //
+  // That ran in an effect, which fires AFTER the dialog has already mounted
+  // <Cropper> - so the cropper was created from an <img> with no src at all.
+  // cropperjs returns early out of init() when the element has no src, so no
+  // instance is really built; the picture then had to arrive through
+  // react-cropper's `reset().clear().replace(url)` on an instance that never
+  // became ready. That recovers most of the time and leaves an empty white box
+  // the rest of the time - which is exactly why Re-select always fixed it: by
+  // then the dialog is open and the cropper is alive.
+  //
+  // Now nothing is mounted until the picture has actually decoded, and the
+  // cropper receives its final src on its very first render, so replace() is
+  // never relied on.
   useEffect(() => {
-    setImage(selectedImage)
-  }, [selectedImage])
+    if (!isOpen || !selectedImage) {
+      // Cleared on close, so the next open cannot flash the previous picture
+      // and re-opening the SAME url still re-runs the load below.
+      setImage(undefined)
+      setStatus('idle')
+
+      return
+    }
+
+    // A data: URL (Re-select, or an already-read file) is in memory already.
+    if (String(selectedImage).startsWith('data:')) {
+      applyImage(selectedImage)
+
+      return
+    }
+
+    let cancelled = false
+    setStatus('loading')
+
+    const probe = new window.Image()
+
+    // The same crossOrigin cropperjs uses for a remote URL. Loading it here
+    // first means a CORS or 404 failure shows as a message instead of an empty
+    // cropper, and the picture is in cache by the time the cropper asks for it.
+    probe.crossOrigin = 'anonymous'
+    probe.onload = () => {
+      if (!cancelled) applyImage(selectedImage)
+    }
+    probe.onerror = () => {
+      if (!cancelled) setStatus('error')
+    }
+    probe.src = selectedImage
+
+    return () => {
+      cancelled = true
+      probe.onload = null
+      probe.onerror = null
+    }
+  }, [isOpen, selectedImage])
   const handleAction = isDelete => {
     setConfirm(false)
     if (isDelete) {
@@ -110,7 +176,7 @@ function ImageUpload({
     if (files[0].size < 50 * 1024 * 1024) {
       const reader = new FileReader()
       reader.onload = () => {
-        setImage(reader.result)
+        applyImage(reader.result)
         e.target.value = null
       }
       reader.readAsDataURL(files[0])
@@ -120,15 +186,28 @@ function ImageUpload({
   }
 
   const applyPhoto = () => {
-    if (typeof cropper !== 'undefined') {
-      cropper.getCroppedCanvas().toBlob(
-        blob => {
-          handleUpload(type, blob)
-        },
-        'image/jpeg',
-        0.8
-      )
+    if (typeof cropper === 'undefined') {
+      return
     }
+
+    // getCroppedCanvas() returns null when the cropper is not ready, and the
+    // old code went straight to .toBlob() on it - a TypeError in the console
+    // and a button that silently did nothing.
+    const canvas = cropper.getCroppedCanvas()
+
+    if (!canvas) {
+      toast.error('Could not read the crop. Please use Re-select and try again.')
+
+      return
+    }
+
+    canvas.toBlob(
+      blob => {
+        handleUpload(type, blob)
+      },
+      'image/jpeg',
+      0.8
+    )
   }
 
   return (
@@ -167,25 +246,54 @@ function ImageUpload({
               </div>
             )}
             {!isPreview && (
-              <Box>
-                <Cropper
-                  className='cropper-design'
-                  zoomTo={0}
-                  aspectRatio={aspectRatio}
-                  preview='.img-preview'
-                  src={image}
-                  viewMode={1}
-                  minCropBoxHeight={10}
-                  minCropBoxWidth={10}
-                  background={false}
-                  responsive={true}
-                  autoCropArea={1}
-                  checkOrientation={false} // https://github.com/fengyuanchen/cropperjs/issues/671
-                  onInitialized={instance => {
-                    setCropper(instance)
-                  }}
-                  guides={true}
-                />
+              <Box sx={{ minHeight: 360 }}>
+                {status === 'ready' && image ? (
+                  <Cropper
+                    // A new instance per picture, created from an <img> that
+                    // already carries the right src.
+                    key={`${type}-${imageKey}`}
+                    className='cropper-design'
+                    zoomTo={0}
+                    aspectRatio={aspectRatio}
+                    preview='.img-preview'
+                    src={image}
+                    viewMode={1}
+                    minCropBoxHeight={10}
+                    minCropBoxWidth={10}
+                    background={false}
+                    responsive={true}
+                    autoCropArea={1}
+                    checkOrientation={false} // https://github.com/fengyuanchen/cropperjs/issues/671
+                    onInitialized={instance => {
+                      setCropper(instance)
+                    }}
+                    guides={true}
+                  />
+                ) : (
+                  <Box
+                    sx={{
+                      minHeight: 360,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 2,
+                      px: 4,
+                      textAlign: 'center'
+                    }}
+                  >
+                    {status === 'error' ? (
+                      <>
+                        <Typography color='error'>This image could not be loaded.</Typography>
+                        <Typography variant='body2' color='text.secondary'>
+                          Use Re-select below to choose it again.
+                        </Typography>
+                      </>
+                    ) : (
+                      <CircularProgress />
+                    )}
+                  </Box>
+                )}
               </Box>
             )}
           </Box>

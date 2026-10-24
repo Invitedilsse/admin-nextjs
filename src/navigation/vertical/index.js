@@ -43,6 +43,27 @@ const navigation = () => {
       subject: 'userlist'
     },
     {
+      title: 'User Activity',
+      path: '/user-activity',
+      icon: 'tabler:activity',
+      action: 'read',
+      subject: 'useractivity'
+    },
+    {
+      title: 'Active Users',
+      path: '/active-users',
+      icon: 'tabler:device-mobile-check',
+      action: 'read',
+      subject: 'activeusers'
+    },
+    {
+      title: 'Send Notification',
+      path: '/send-notification',
+      icon: 'tabler:bell-plus',
+      action: 'read',
+      subject: 'sendnotification'
+    },
+    {
       title: 'Assign Tasks',
       path: '/assign-tasks',
       icon: 'tabler:clipboard-list',
@@ -88,6 +109,13 @@ const navigation = () => {
           title: 'Campaign Management',
           path: '/campaign',
           icon: 'tabler:speakerphone',
+          action: 'read',
+          subject: 'campaign'
+        },
+        {
+          title: 'Gift Campaign',
+          path: '/gift-campaign',
+          icon: 'tabler:gift',
           action: 'read',
           subject: 'campaign'
         }
@@ -158,6 +186,16 @@ const navigation = () => {
           icon: 'tabler:file-text',
           action: 'read',
           subject: 'familydocuments'
+        },
+        {
+          // ** The same shape of work as Family Documents, over travel details
+          //    instead of papers, so it sits next to it rather than in a row of
+          //    its own where the eye would not look for it.
+          title: 'Travel Plan',
+          path: '/travel-plan',
+          icon: 'tabler:plane-arrival',
+          action: 'read',
+          subject: 'travelplan'
         }
       ]
     },

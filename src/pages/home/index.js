@@ -174,7 +174,16 @@ const Home = () => {
       route: '/admin-function-reports'
     },
     {
-      title: 'Users',
+      // ! WHAT THIS NUMBER IS, since the label no longer says it.
+      //   `user_count` counts DISTINCT USERS WHO REGISTERED A PUSH TOKEN in the
+      //   selected range - one row per user from `fcm`, newest first
+      //   (function-reports/controller.js, the dashboard-report query). It is a
+      //   proxy for logging in, not a count of the `users` table, and it is NOT
+      //   first-time-only: somebody who signed up last year and opened the app
+      //   today is in today's figure. If this card is ever meant to mean
+      //   genuinely new people, the QUERY has to change - renaming it here does
+      //   not change what it counts.
+      title: 'New Users',
       value: dashboardData?.user_count || 0,
       color: 'info',
       icon: 'tabler:users',
