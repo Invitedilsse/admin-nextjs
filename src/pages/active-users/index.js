@@ -19,8 +19,6 @@ import {
   DialogActions,
   Alert,
   AlertTitle,
-  ToggleButton,
-  ToggleButtonGroup,
   CircularProgress
 } from '@mui/material'
 
@@ -61,6 +59,32 @@ const n = (value) =>
 
 const PAGE = { pageIndex: 0, pageSize: 25 }
 
+/** What the table underneath is showing, named the same way the card is. */
+const SCOPE_TITLE = {
+  last_sweep: 'Active users',
+  all: 'Ever active users',
+  accounts: 'Accounts',
+  devices: 'Total devices',
+  active_devices: 'Active devices',
+  unreachable: 'Inactive devices'
+}
+
+const SCOPE_EMPTY = {
+  last_sweep: 'No phone answered the last check',
+  all: 'No phone has ever answered a check',
+  accounts: 'No accounts are on the active list',
+  devices: 'No device tokens are on record',
+  active_devices: 'No phone answered the last check',
+  unreachable: 'No device is currently unreachable'
+}
+
+/** What a device row is saying about itself, and how it should read. */
+const DEVICE_STATE = {
+  answered: { label: 'Active', color: 'success' },
+  unreachable: { label: 'Inactive', color: 'error' },
+  'never asked': { label: 'Not checked yet', color: 'default' }
+}
+
 /**
  * `messaging/registration-token-not-registered` -> `Uninstalled or token
  * expired`.
@@ -93,6 +117,23 @@ const ActiveUsers = () => {
   const [confirming, setConfirming] = useState(false)
   const [checking, setChecking] = useState(false)
   const [result, setResult] = useState(null)
+
+  /**
+   * Which shape the table is in. Mirrors `shapeOf` in the service - the API
+   * decides what the rows ARE, this decides how they are drawn, and the two
+   * agree on the same six scope names.
+   *
+   * ! DECLARED HERE, ABOVE EVERYTHING THAT READS IT.
+   *   `columns` is a useMemo that branches on this. A const read before its
+   *   declaration throws at render, and the User Activity page in this same
+   *   portal shipped exactly that once.
+   */
+  const shape =
+    scope === 'accounts'
+      ? 'account'
+      : ['devices', 'active_devices', 'unreachable'].includes(scope)
+        ? 'device'
+        : 'person'
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -192,39 +233,119 @@ const ActiveUsers = () => {
           return <Typography variant='body2'>{shown || DASH}</Typography>
         }
       },
-      {
-        accessorKey: 'accounts',
-        header: 'Accounts',
-        Cell: ({ cell }) => {
-          const value = cell.getValue()
+      // Person and account lists only. A device row carries no account
+      // count, and an undefined one rendered as a confident "1".
+      ...(shape === 'device'
+        ? []
+        : [
+            {
+              accessorKey: 'accounts',
+              header: 'Accounts',
+              Cell: ({ cell }) => {
+                const value = cell.getValue()
 
-          if (!value || value === 1) return <Typography variant='body2'>1</Typography>
+                if (!value || value === 1) return <Typography variant='body2'>1</Typography>
 
-          return (
-            <Tooltip
-              title={
-                `This mobile number has ${value} rows in the users table. They are ` +
-                'shown once, under the signed-up account.'
+                return (
+                  <Tooltip
+                    title={
+                      `This mobile number has ${value} rows in the users table. ` +
+                      (shape === 'account'
+                        ? 'Each one is listed separately here.'
+                        : 'They are shown once, under the signed-up account.')
+                    }
+                  >
+                    <Chip size='small' color='warning' variant='outlined' label={value} />
+                  </Tooltip>
+                )
               }
-            >
-              <Chip size='small' color='warning' variant='outlined' label={value} />
-            </Tooltip>
-          )
-        }
-      },
-      {
-        accessorKey: 'devices',
-        header: 'Devices',
-        Cell: ({ cell }) => <Typography variant='body2'>{n(cell.getValue())}</Typography>
-      },
-      {
-        accessorKey: 'signed_in_devices',
-        header: 'Signed in',
-        Cell: ({ cell }) => <Typography variant='body2'>{n(cell.getValue())}</Typography>
-      },
+            }
+          ]),
+      // Person-shaped lists only: a device row stands for one phone, so
+      // "3 devices" against it would be the owner's total and not this row's.
+      ...(shape === 'person'
+        ? [
+            {
+              accessorKey: 'devices',
+              header: 'Devices',
+              Cell: ({ cell }) => <Typography variant='body2'>{n(cell.getValue())}</Typography>
+            },
+            {
+              accessorKey: 'signed_in_devices',
+              header: 'Signed in',
+              Cell: ({ cell }) => <Typography variant='body2'>{n(cell.getValue())}</Typography>
+            }
+          ]
+        : []),
+
+      // Device-shaped lists: which phone, and what it last said.
+      ...(shape === 'device'
+        ? [
+            {
+              accessorKey: 'device_state',
+              header: 'Status',
+              Cell: ({ row }) => {
+                const state = DEVICE_STATE[row.original.device_state] || {
+                  label: row.original.device_state || DASH,
+                  color: 'default'
+                }
+
+                return (
+                  <Tooltip
+                    // The Firebase code is the evidence and stays readable,
+                    // but it is not what the word on the chip should be.
+                    title={row.original.failure_reason || ''}
+                    disableHoverListener={!row.original.failure_reason}
+                  >
+                    <Chip size='small' variant='outlined' color={state.color} label={state.label} />
+                  </Tooltip>
+                )
+              }
+            },
+            {
+              accessorKey: 'failure_reason',
+              header: 'Why',
+              Cell: ({ cell }) => {
+                const code = cell.getValue()
+
+                if (!code) return <Typography variant='body2'>{DASH}</Typography>
+
+                return (
+                  <Tooltip title={code}>
+                    <Typography variant='body2'>{REASONS[code] || code}</Typography>
+                  </Tooltip>
+                )
+              }
+            },
+            {
+              accessorKey: 'device_id',
+              header: 'Device',
+              Cell: ({ cell }) => (
+                <Tooltip title={cell.getValue() || ''}>
+                  <Typography
+                    variant='body2'
+                    sx={{ maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis' }}
+                  >
+                    {cell.getValue() || DASH}
+                  </Typography>
+                </Tooltip>
+              )
+            },
+            {
+              accessorKey: 'signed_out',
+              header: 'Signed in',
+              Cell: ({ cell }) => (
+                <Typography variant='body2'>{cell.getValue() ? 'No' : 'Yes'}</Typography>
+              )
+            }
+          ]
+        : []),
+
       {
         accessorKey: 'last_active_ist',
-        header: 'Last answered (IST)',
+        // A device that has never answered has nothing to put here, and a
+        // blank is the honest version of that.
+        header: shape === 'device' ? 'Last answered (IST)' : 'Last answered (IST)',
         Cell: ({ cell }) => (
           <Typography variant='body2' sx={{ fontVariantNumeric: 'tabular-nums' }}>
             {cell.getValue() || DASH}
@@ -232,7 +353,7 @@ const ActiveUsers = () => {
         )
       }
     ],
-    []
+    [shape]
   )
 
   const table = useMaterialReactTable({
@@ -250,42 +371,78 @@ const ActiveUsers = () => {
   })
 
   /**
-   * ! THE FIRST TWO CARDS COUNT PEOPLE; THE REST COUNT ROWS AND PHONES.
-   *   They are captioned as such rather than lined up as five equal figures,
-   *   because "4 users" above a table of 4 lines and "7 accounts" beside it
-   *   are only confusing if nothing says which is which.
+   * ! COUNTING PEOPLE AND COUNTING PHONES ARE DIFFERENT QUESTIONS.
+   *   They used to sit in one row of five, captioned "the first two count
+   *   people; the rest count rows and devices" - which is a sentence asking
+   *   the reader to remember which card is which. Two labelled groups say it
+   *   without being read.
+   *
+   * ! EVERY CARD IS A BUTTON, AND ITS `scope` IS THE LIST BEHIND IT.
+   *   The figure and the list come from one name end to end - the card, this
+   *   scope, the API's whitelist, one query in the service. A card reading
+   *   5,140 cannot open a list of anything else, because there is nowhere
+   *   for the two to be defined separately.
    */
-  const cards = [
+  const groups = [
     {
-      label: 'Answered the last check',
-      value: summary?.reachable_last_sweep,
-      hint: 'People whose phone replied to the most recent check.'
+      group: 'People',
+      cards: [
+        {
+          scope: 'last_sweep',
+          label: 'Active users',
+          value: summary?.reachable_last_sweep,
+          hint: 'People whose phone answered the most recent check.'
+        },
+        {
+          scope: 'all',
+          label: 'Ever active users',
+          value: summary?.reachable_ever,
+          hint: 'People whose phone has answered any check we have run.'
+        },
+        {
+          scope: 'accounts',
+          label: 'Accounts',
+          value: summary?.active_accounts,
+          hint:
+            'Rows in the users table behind those people, before duplicate ' +
+            'mobile numbers are merged. The gap between this and the figure ' +
+            'to its left is the duplication. Click to see which ones.'
+        }
+      ]
     },
     {
-      label: 'Answered at some point',
-      value: summary?.reachable_ever,
-      hint: 'People whose phone has replied to any check we have run.'
-    },
-    {
-      label: 'Accounts behind them',
-      value: summary?.active_accounts,
-      hint:
-        'Rows in the active list before duplicate mobile numbers are merged. ' +
-        'The gap between this and the figure to its left is the duplication.'
-    },
-    {
-      label: 'Devices on record',
-      value: summary?.tokens,
-      hint: 'Device tokens the next check would ask about.'
-    },
-    {
-      label: 'Still unreachable',
-      value: summary?.unreachable_devices,
-      hint:
-        'Devices that failed the last check they were in and have not answered ' +
-        'since. A reinstall clears a device from this count.'
+      group: 'Devices',
+      cards: [
+        {
+          scope: 'devices',
+          label: 'Total devices',
+          value: summary?.tokens,
+          hint:
+            'Every phone we hold a token for - the app was installed on it at ' +
+            'some point. This is what the next check asks.'
+        },
+        {
+          scope: 'active_devices',
+          label: 'Active devices',
+          value: summary?.active_devices_last_sweep,
+          hint:
+            'Phones that answered the most recent check, so the app is still ' +
+            'installed. Recorded per device only from the next check onward, ' +
+            'so this reads 0 until one has been run.'
+        },
+        {
+          scope: 'unreachable',
+          label: 'Inactive devices',
+          value: summary?.unreachable_devices,
+          hint:
+            'Phones that failed the last check they were in and have not ' +
+            'answered since - the app was most likely removed. A reinstall ' +
+            'clears a device from this count.'
+        }
+      ]
     }
   ]
+
 
   const reasonRows = Object.entries(result?.reasons || {}).sort((a, b) => b[1] - a[1])
 
@@ -336,34 +493,74 @@ const ActiveUsers = () => {
 
             <CardContent>
               <Typography variant='caption' color='text.secondary' sx={{ display: 'block', mb: 3 }}>
-                Measured by asking the phones, not inferred from app usage. The first two
-                figures count people; the rest count rows and devices.
+                Measured by asking the phones, not guessed from app usage. Click any figure
+                to see the list behind it.
               </Typography>
 
-              <Grid2 container spacing={3}>
-                {cards.map((card) => (
-                  <Grid2 key={card.label} size={{ xs: 6, md: 2.4 }}>
-                    <Tooltip title={card.hint}>
-                      <Box
-                        sx={{
-                          p: 3,
-                          borderRadius: 1,
-                          bgcolor: 'customColors.surfaceSunken',
-                          textAlign: 'center',
-                          height: '100%'
-                        }}
-                      >
-                        <Typography variant='h5' sx={{ fontVariantNumeric: 'tabular-nums' }}>
-                          {n(card.value)}
-                        </Typography>
-                        <Typography variant='caption' color='text.secondary'>
-                          {card.label}
-                        </Typography>
-                      </Box>
-                    </Tooltip>
+              {groups.map((section) => (
+                <Box key={section.group} sx={{ mb: 4, '&:last-of-type': { mb: 0 } }}>
+                  <Typography
+                    variant='caption'
+                    sx={{ display: 'block', mb: 2, fontWeight: 600, letterSpacing: 0.4 }}
+                    color='text.secondary'
+                  >
+                    {section.group.toUpperCase()}
+                  </Typography>
+
+                  <Grid2 container spacing={3}>
+                    {section.cards.map((card) => {
+                      const selected = scope === card.scope
+
+                      return (
+                        <Grid2 key={card.scope} size={{ xs: 12, sm: 4 }}>
+                          <Tooltip title={card.hint}>
+                            {/* A real button, so it is reachable by keyboard
+                                and reads as clickable to a screen reader.
+                                A clickable Box is neither. */}
+                            <Box
+                              component='button'
+                              type='button'
+                              onClick={() => {
+                                setScope(card.scope)
+                                setPagination((p) => ({ ...p, pageIndex: 0 }))
+                              }}
+                              sx={{
+                                width: '100%',
+                                height: '100%',
+                                p: 3,
+                                cursor: 'pointer',
+                                font: 'inherit',
+                                borderRadius: 1,
+                                textAlign: 'center',
+                                bgcolor: selected
+                                  ? 'primary.lighterOpacity'
+                                  : 'customColors.surfaceSunken',
+                                border: (theme) =>
+                                  `1px solid ${
+                                    selected ? theme.palette.primary.main : 'transparent'
+                                  }`,
+                                transition: 'border-color .15s, background-color .15s',
+                                '&:hover': { borderColor: 'primary.main' }
+                              }}
+                            >
+                              <Typography
+                                variant='h5'
+                                sx={{ fontVariantNumeric: 'tabular-nums' }}
+                                color={selected ? 'primary.main' : 'text.primary'}
+                              >
+                                {n(card.value)}
+                              </Typography>
+                              <Typography variant='caption' color='text.secondary'>
+                                {card.label}
+                              </Typography>
+                            </Box>
+                          </Tooltip>
+                        </Grid2>
+                      )
+                    })}
                   </Grid2>
-                ))}
-              </Grid2>
+                </Box>
+              ))}
             </CardContent>
 
             {result ? (
@@ -407,21 +604,18 @@ const ActiveUsers = () => {
                 flexWrap: 'wrap'
               }}
             >
-              <ToggleButtonGroup
-                size='small'
-                exclusive
-                value={scope}
-                onChange={(event, value) => {
-                  if (!value) return
-                  setScope(value)
-                  setPagination((p) => ({ ...p, pageIndex: 0 }))
-                }}
-              >
-                <ToggleButton value='last_sweep'>Last check</ToggleButton>
-                <ToggleButton value='all'>Everyone ever</ToggleButton>
-              </ToggleButtonGroup>
+              {/* The Last check / Everyone ever toggle used to live here. It
+                  is gone: it switched between two of the six lists while the
+                  other four had no way in, and with the cards selecting the
+                  list it was a second control for the same state. */}
+              <Typography variant='body2' sx={{ fontWeight: 600 }}>
+                {SCOPE_TITLE[scope] || 'Active users'}
+                <Typography component='span' variant='body2' color='text.secondary'>
+                  {' '}· {n(count)}
+                </Typography>
+              </Typography>
 
-              <Box sx={{ flex: 1, minWidth: 200 }} />
+              <Box sx={{ flex: 1, minWidth: 120 }} />
 
               <TextField
                 size='small'
@@ -437,17 +631,13 @@ const ActiveUsers = () => {
 
             {rows.length === 0 && !loading ? (
               <EmptyState
-                title={
-                  search
-                    ? 'Nobody matches that search'
-                    : scope === 'last_sweep'
-                      ? 'No phone has answered a check yet'
-                      : 'No phone has ever answered a check'
-                }
+                title={search ? 'Nothing matches that search' : SCOPE_EMPTY[scope] || 'Nothing here yet'}
                 subtitle={
                   search
-                    ? 'Clear the search to see everyone in this list.'
-                    : 'Press "Check who is active" to ask every device on record.'
+                    ? 'Clear the search to see everything in this list.'
+                    : scope === 'active_devices'
+                      ? 'Devices are recorded individually only from the next check onward. Press "Check who is active".'
+                      : 'Press "Check who is active" to ask every device on record.'
                 }
               />
             ) : (
