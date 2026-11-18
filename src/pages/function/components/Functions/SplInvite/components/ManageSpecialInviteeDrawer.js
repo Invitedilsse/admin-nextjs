@@ -85,13 +85,21 @@ const SideBarSpecialInvitee = props => {
           description: values.description
         }
         let mainLogo = null
-        if (values.imagePreview !== null) {
+
+        // ! TRUTHY, NOT `!== null` - see ManageFirmsDrawer for the long
+        //   version. The delete path stores URL.revokeObjectURL()'s return,
+        //   which is undefined, and `undefined !== null` is true.
+        if (values.imagePreview) {
           const imageRes = await apiPost(`${baseURL}user/upload-doc`, logoFormData, true)
           var temp = [imageRes?.data?.detail]
           mainLogo = temp
           params['image'] = mainLogo
         } else {
-          params['image'] = RowData?.image
+          // ! THE IMAGE AS THE FORM STANDS NOW, NOT AS THE ROW ARRIVED.
+          //   RowData is the list's copy and keeps the original picture for
+          //   as long as the drawer is open, so deleting it and pressing
+          //   Update wrote the old one straight back over the delete.
+          params['image'] = (uploadedFileData || []).filter(f => f && f.url)
         }
         const result =
           id === ''
@@ -161,8 +169,15 @@ const SideBarSpecialInvitee = props => {
     } else {
       if (type == 'logo') {
         setLogoFormData(null)
-        const ur = URL.revokeObjectURL(file)
-        formik.setFieldValue('imagePreview', ur)
+
+        // ! revokeObjectURL RETURNS undefined - IT IS NOT A VALUE.
+        //   Storing its return left imagePreview undefined instead of
+        //   null, which is what sent the submit handler down the upload
+        //   branch for a picture that had just been removed.
+        if (typeof formik.values.imagePreview === 'string') {
+          URL.revokeObjectURL(formik.values.imagePreview)
+        }
+        formik.setFieldValue('imagePreview', null)
       }
     }
   }

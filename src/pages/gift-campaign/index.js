@@ -16,13 +16,15 @@ import {
   DialogActions,
   Divider,
   Tooltip,
-  Alert
+  Alert,
+  Autocomplete,
+  CircularProgress
 } from '@mui/material'
 
 import { useMaterialReactTable, MaterialReactTable } from 'material-react-table'
 
 import { apiGet, apiPost, apiPatch } from 'src/hooks/axios'
-import { baseURL } from 'src/services/pathConst'
+import { baseURL, chatwiseTemplatesUrl, chatwiseTemplateUrl } from 'src/services/pathConst'
 
 // ** Iconify, not @mui/material's Icon. The two are different components with the
 //    same name and only this one understands `icon='tabler:gift'`.
@@ -100,17 +102,161 @@ const GiftEventDialog = ({ open, row, onClose, onSaved }) => {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
+  // The header picture is uploaded the moment it is chosen, not on Save:
+  // what the row stores is an address, and there is no address until the
+  // file is in S3.
+  const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState('')
+
+  // ! THE PORTAL'S OWN PROXY, NOT chatwise.in DIRECTLY.
+  //   admin-nodejs already has GET /chatwise/templates, which calls
+  //   ChatWise with CHATWISE_API_TOKEN from its .env. Calling chatwise.in
+  //   from here would mean shipping that token in the browser bundle,
+  //   where anyone who can open the portal can read it - and it is the
+  //   token for the whole WhatsApp account, not for this screen.
+  const [templates, setTemplates] = useState([])
+  const [loadingTemplates, setLoadingTemplates] = useState(false)
+  const [templatesFailed, setTemplatesFailed] = useState(false)
+
+  // The chosen template's body: its text, and how many {{n}} it declares.
+  const [tplBody, setTplBody] = useState('')
+  const [tplVars, setTplVars] = useState(0)
+  const [tplHasHeaderImage, setTplHasHeaderImage] = useState(false)
+  const [tplThin, setTplThin] = useState(false)
+  const [loadingTemplate, setLoadingTemplate] = useState(false)
+
+  /**
+   * ! THE NUMBER OF VALUE BOXES IS THE TEMPLATE'S TO DECIDE, NOT THE ADMIN'S.
+   *   Three boxes were hard-coded because thank_you_main happens to have
+   *   three. Pick a template with two and the third is sent as a value
+   *   WhatsApp has nowhere to put; pick one with four and the fourth
+   *   arrives as the literal text "Missing Field 4" (see sendWhatsappGift).
+   *
+   * ! THE TEMPLATE SITS AT A DIFFERENT DEPTH IN EACH ANSWER.
+   *   /chatwise/template/:uid tries ChatWise's get-template-details and
+   *   falls back to the row in the template list, which nests differently
+   *   and carries no components at all. Resolve it once, here.
+   */
+  const loadTemplateShape = useCallback(async uid => {
+    setTplBody('')
+    setTplVars(0)
+    setTplHasHeaderImage(false)
+    setTplThin(false)
+
+    if (!uid) return
+
+    setLoadingTemplate(true)
+    try {
+      const res = await apiGet(chatwiseTemplateUrl(uid))
+      const payload = res?.data?.data
+      const tpl = payload?.__data?.template || payload?.template || payload || {}
+      const components = tpl?.components || []
+
+      const body = components.find(c => c?.type === 'BODY')
+      const text = body?.text || ''
+
+      // {{1}} {{2}} ... — the highest number it uses, not how many times
+      // it uses them: a template may repeat {{1}} and still take one value.
+      const numbers = [...String(text).matchAll(/\{\{\s*(\d+)\s*\}\}/g)]
+        .map(m => Number(m[1]))
+        .filter(n => Number.isFinite(n))
+
+      const count = numbers.length ? Math.max(...numbers) : 0
+
+      setTplBody(text)
+      setTplVars(count)
+      setTplHasHeaderImage(
+        Boolean(components.find(c => c?.type === 'HEADER' && c?.format === 'IMAGE'))
+      )
+      setTplThin(components.length === 0)
+
+      // Keep what has been typed, add or drop boxes to match the template.
+      if (count > 0) {
+        setFields(list => {
+          const next = list.slice(0, count)
+          while (next.length < count) next.push('')
+
+          return next
+        })
+      }
+    } catch {
+      setTplThin(true)
+    } finally {
+      setLoadingTemplate(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!open) return
+
+    let live = true
+
+    setLoadingTemplates(true)
+    setTemplatesFailed(false)
+
+    // 200 a page: the account had 65 at the time of writing and the
+    // response is one page, so there is nothing to page through yet.
+    apiGet(`${chatwiseTemplatesUrl}?page=1&page_size=200`)
+      .then(res => {
+        if (!live) return
+
+        const rows = res?.data?.data?.templateList?.data || []
+
+        // ! APPROVED ONLY, AND ONE ROW PER NAME.
+        //   A template Meta has not approved cannot be sent with, so
+        //   offering it would only produce a failure at send time. The same
+        //   name can also appear once per language (hello_world is en and
+        //   en_US), and the gift event stores a NAME - so two identical
+        //   options would be a choice with no difference.
+        const seen = new Set()
+        const names = []
+
+        rows.forEach(t => {
+          const name = (t?.template_name || '').trim()
+
+          if (!name || t?.status !== 'APPROVED' || seen.has(name)) return
+
+          seen.add(name)
+          names.push({
+            name,
+            category: t?.category || '',
+            // The details call needs an id; _uid is what ChatWise's own
+            // endpoint takes, and the server's fallback matches either.
+            uid: t?._uid || t?._id || ''
+          })
+        })
+
+        names.sort((a, b) => a.name.localeCompare(b.name))
+        setTemplates(names)
+      })
+      .catch(() => {
+        if (!live) return
+
+        // Not a toast: the field below says it, and stays usable by hand.
+        setTemplatesFailed(true)
+      })
+      .finally(() => {
+        if (live) setLoadingTemplates(false)
+      })
+
+    return () => {
+      live = false
+    }
+  }, [open])
+
   useEffect(() => {
     if (!open) return
 
     setError('')
+    setUploadError('')
     setForm({
       eventname: row?.eventname || '',
       name: row?.name || '',
       mobile: row?.mobile || '',
       country_code: row?.country_code || '+91',
       tempalte_name: row?.template_name || row?.tempalte_name || '',
-      tempalte_image_url: row?.template_image_url || row?.tempalte_image_url || ''
+      tempalte_image_url: row?.template_image_url || row?.tempalte_image_url || '',
+      host_bwnum_code: row?.host_bwnum_code || ''
     })
 
     const existing = fieldLines(row?.fields)
@@ -121,6 +267,56 @@ const GiftEventDialog = ({ open, row, onClose, onSaved }) => {
   }, [open, row])
 
   const set = (key, value) => setForm(f => ({ ...f, [key]: value }))
+
+  /**
+   * Chosen file -> S3 -> the address goes in the form.
+   *
+   * ! admin/upload-doc, NOT user/upload-doc.
+   *   The host portal uploads through the app's backend; this portal talks
+   *   to admin-nodejs on its own base URL, and only that one carries an
+   *   admin token. Both put the object in the same bucket under
+   *   user-section/, so a picture uploaded here is fetched exactly like one
+   *   uploaded there.
+   */
+  const uploadImage = async e => {
+    const file = e.target.files && e.target.files[0]
+
+    // ! CLEARED BEFORE ANYTHING ELSE.
+    //   The same input serves Replace, and a browser fires no change event
+    //   when the SAME file is picked a second time unless the value is
+    //   reset - so a failed upload could not be retried with that file.
+    e.target.value = ''
+
+    if (!file) return
+
+    // The server checks this too (admin/schema.js), but its answer names no
+    // field, so an unsupported file would fail with nothing to act on.
+    if (file.type !== 'image/jpeg' && file.type !== 'image/png') {
+      setUploadError('That file is not a JPG or a PNG.')
+
+      return
+    }
+
+    setUploadError('')
+    setUploading(true)
+    try {
+      const data = new FormData()
+      data.append('file', file)
+
+      const res = await apiPost(`${baseURL}admin/upload-doc`, data, true)
+      const url = res?.data?.detail?.url
+
+      if (!url) throw new Error('The upload finished without returning an address.')
+
+      set('tempalte_image_url', url)
+    } catch (err) {
+      setUploadError(
+        err?.response?.data?.message || err?.message || 'Could not upload that image.'
+      )
+    } finally {
+      setUploading(false)
+    }
+  }
 
   const save = async () => {
     setSaving(true)
@@ -194,35 +390,199 @@ const GiftEventDialog = ({ open, row, onClose, onSaved }) => {
             />
           </Stack>
 
+          {/* ! NOT OPTIONAL IN PRACTICE, THOUGH THE COLUMN ALLOWS NULL.
+                dispatch.js refuses an event without one: with no from-number
+                the panel picks its own, and a gift message arriving from an
+                unrelated business number reads as a scam. Better to be told
+                here than at the moment of sending. */}
           <TextField
-            label='WhatsApp template name'
-            value={form.tempalte_name || ''}
-            onChange={e => set('tempalte_name', e.target.value)}
+            label='Host Number Code'
+            value={form.host_bwnum_code || ''}
+            onChange={e => set('host_bwnum_code', e.target.value)}
             size='small'
             fullWidth
-            helperText='Exactly as approved in Meta, e.g. thank_you_main'
+            helperText='The WhatsApp number this event sends from. Dispatch is refused without it.'
           />
 
-          <TextField
-            label='Template image URL'
-            value={form.tempalte_image_url || ''}
-            onChange={e => set('tempalte_image_url', e.target.value)}
-            size='small'
-            fullWidth
-            helperText='https only — WhatsApp fetches it unauthenticated when the message is sent'
+          {/* ! freeSolo, SO THE FIELD NEVER THROWS A NAME AWAY.
+                A plain Select would blank an event whose template has since
+                been renamed or un-approved, and would leave the admin with
+                nothing to type into on the day ChatWise is unreachable. The
+                list is a shortcut, not a gate. */}
+          <Autocomplete
+            freeSolo
+            autoHighlight
+            options={templates}
+            getOptionLabel={option =>
+              typeof option === 'string' ? option : option?.name || ''
+            }
+            value={form.tempalte_name || ''}
+            onChange={(e, chosen) => {
+              set(
+                'tempalte_name',
+                typeof chosen === 'string' ? chosen : chosen?.name || ''
+              )
+
+              loadTemplateShape(typeof chosen === 'string' ? '' : chosen?.uid)
+            }}
+            onInputChange={(e, text, reason) => {
+              if (reason === 'input') set('tempalte_name', text)
+            }}
+            loading={loadingTemplates}
+            renderOption={(props, option) => (
+              <Box
+                component='li'
+                {...props}
+                key={option.name}
+                sx={{ display: 'flex', gap: 2, alignItems: 'baseline' }}
+              >
+                <Typography variant='body2' sx={{ flexGrow: 1 }}>
+                  {option.name}
+                </Typography>
+                {option.category ? (
+                  <Typography
+                    variant='caption'
+                    sx={{ color: 'text.secondary', whiteSpace: 'nowrap' }}
+                  >
+                    {option.category.toLowerCase()}
+                  </Typography>
+                ) : null}
+              </Box>
+            )}
+            renderInput={params => (
+              <TextField
+                {...params}
+                label='WhatsApp template name'
+                size='small'
+                fullWidth
+                helperText={
+                  templatesFailed
+                    ? 'Could not reach ChatWise — type the name exactly as approved in Meta'
+                    : 'Approved templates on the WhatsApp account. Type to search.'
+                }
+                InputProps={{
+                  ...params.InputProps,
+                  endAdornment: (
+                    <>
+                      {loadingTemplates ? (
+                        <CircularProgress color='inherit' size={16} />
+                      ) : null}
+                      {params.InputProps.endAdornment}
+                    </>
+                  )
+                }}
+              />
+            )}
           />
+
+          {/* ! A PICTURE IS CHOSEN, NOT AN ADDRESS TYPED.
+                The column still holds a URL, because that is what WhatsApp
+                fetches - but nobody has an https address for a picture
+                sitting on their laptop, and pasting one by hand is how an
+                event ends up pointing at a file that moves or disappears.
+                Upload puts it in the same bucket the host portal uses and
+                fills the column from what S3 answers. */}
+          <Box>
+            <Typography variant='subtitle2' sx={{ mb: 1 }}>
+              Template image
+            </Typography>
+
+            <Stack direction='row' spacing={2} alignItems='center'>
+              <Button
+                component='label'
+                variant='outlined'
+                size='small'
+                disabled={uploading}
+                startIcon={
+                  uploading ? <CircularProgress size={14} /> : <Icon icon='tabler:upload' />
+                }
+              >
+                {uploading ? 'Uploading...' : form.tempalte_image_url ? 'Replace image' : 'Upload image'}
+                <input type='file' hidden accept='image/jpeg,image/png' onChange={uploadImage} />
+              </Button>
+
+              {form.tempalte_image_url && !uploading ? (
+                <Button size='small' color='secondary' onClick={() => set('tempalte_image_url', '')}>
+                  Remove
+                </Button>
+              ) : null}
+            </Stack>
+
+            {uploadError ? (
+              <Alert severity='error' sx={{ mt: 2 }}>
+                {uploadError}
+              </Alert>
+            ) : null}
+
+            {form.tempalte_image_url ? (
+              <Stack direction='row' spacing={2} sx={{ mt: 2 }} alignItems='center'>
+                <Box
+                  component='img'
+                  src={form.tempalte_image_url}
+                  alt='Template header'
+                  sx={{
+                    width: 96,
+                    height: 96,
+                    objectFit: 'cover',
+                    borderRadius: 1,
+                    border: theme => `1px solid ${theme.palette.divider}`
+                  }}
+                />
+                <Typography
+                  variant='caption'
+                  sx={{ color: 'text.secondary', wordBreak: 'break-all' }}
+                >
+                  {form.tempalte_image_url}
+                </Typography>
+              </Stack>
+            ) : (
+              <Typography
+                variant='caption'
+                sx={{ display: 'block', mt: 1, color: 'text.secondary' }}
+              >
+                JPG or PNG. The file is stored, and its address is what WhatsApp fetches
+                when the message is sent.
+              </Typography>
+            )}
+          </Box>
 
           <Divider />
 
           <Box>
-            <Typography variant='subtitle2' sx={{ mb: 2 }}>
-              Template values
-            </Typography>
+            <Stack direction='row' spacing={2} alignItems='center' sx={{ mb: 1 }}>
+              <Typography variant='subtitle2'>Template values</Typography>
+              {loadingTemplate ? <CircularProgress size={14} /> : null}
+              {tplVars > 0 ? (
+                <Typography variant='caption' sx={{ color: 'text.secondary' }}>
+                  {tplVars} in this template
+                </Typography>
+              ) : null}
+            </Stack>
+
+            {/* ! THE NOTE GOES ABOVE THE FIRST BOX, NOT IN A TOOLTIP.
+                  Somebody filling these in has no way to know a value can be
+                  a column name rather than a fixed word, and a feature
+                  nobody can see is a feature nobody uses. */}
+            <Alert severity='info' sx={{ mb: 2 }}>
+              A value can be fixed text, or one of these, filled in per guest
+              from the gift table when the message is sent:{' '}
+              <strong>{'{{name}}'}</strong>, <strong>{'{{code}}'}</strong>,{' '}
+              <strong>{'{{mobile}}'}</strong>, <strong>{'{{eventname}}'}</strong>.
+            </Alert>
+
+            {tplThin ? (
+              <Alert severity='warning' sx={{ mb: 2 }}>
+                ChatWise did not return this template&apos;s body, so the number of
+                values below could not be checked against it. Add exactly as many
+                as the approved template declares.
+              </Alert>
+            ) : null}
+
             <Stack spacing={2}>
               {fields.map((value, i) => (
                 <TextField
                   key={i}
-                  label={`Field ${i}`}
+                  label={tplVars > 0 ? `{{${i + 1}}}` : `Field ${i}`}
                   value={value}
                   onChange={e => setFields(list => list.map((v, j) => (j === i ? e.target.value : v)))}
                   size='small'
@@ -231,16 +591,79 @@ const GiftEventDialog = ({ open, row, onClose, onSaved }) => {
               ))}
             </Stack>
 
-            <Stack direction='row' spacing={2} sx={{ mt: 2 }} alignItems='center'>
-              <Button size='small' onClick={() => setFields(l => [...l, ''])}>
-                Add a field
-              </Button>
-              {fields.length > 1 ? (
-                <Button size='small' color='secondary' onClick={() => setFields(l => l.slice(0, -1))}>
-                  Remove the last
+            {/* The buttons stay for a template whose body never arrived -
+                see the warning above - and go when the count is known. */}
+            {tplVars > 0 ? null : (
+              <Stack direction='row' spacing={2} sx={{ mt: 2 }} alignItems='center'>
+                <Button size='small' onClick={() => setFields(l => [...l, ''])}>
+                  Add a field
                 </Button>
-              ) : null}
-            </Stack>
+                {fields.length > 1 ? (
+                  <Button size='small' color='secondary' onClick={() => setFields(l => l.slice(0, -1))}>
+                    Remove the last
+                  </Button>
+                ) : null}
+              </Stack>
+            )}
+
+            {tplBody ? (
+              <Box
+                sx={{
+                  mt: 3,
+                  p: 2,
+                  borderRadius: 1,
+                  bgcolor: 'action.hover',
+                  border: theme => `1px solid ${theme.palette.divider}`
+                }}
+              >
+                <Typography variant='subtitle2' sx={{ mb: 1 }}>
+                  Message preview
+                </Typography>
+
+                {tplHasHeaderImage ? (
+                  <Typography
+                    variant='caption'
+                    sx={{ display: 'block', mb: 1, color: 'text.secondary' }}
+                  >
+                    {form.tempalte_image_url
+                      ? 'Header image: the picture above'
+                      : 'This template has a header image — upload one above'}
+                  </Typography>
+                ) : null}
+
+                {/* ! WHAT IT WILL LOOK LIKE, NOT WHAT IT WILL SAY.
+                      A value of {{name}} is a different guest's name in every
+                      message, so the preview shows the value as typed rather
+                      than pretending to know whose it is. */}
+                <Typography
+                  variant='body2'
+                  sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.7 }}
+                >
+                  {String(tplBody)
+                    .split(/(\{\{\s*\d+\s*\}\})/g)
+                    .map((part, i) => {
+                      const hit = /^\{\{\s*(\d+)\s*\}\}$/.exec(part)
+
+                      if (!hit) return <span key={i}>{part}</span>
+
+                      const typed = fields[Number(hit[1]) - 1]
+
+                      return (
+                        <Box
+                          key={i}
+                          component='span'
+                          sx={{
+                            color: typed ? 'success.main' : 'warning.main',
+                            fontWeight: 600
+                          }}
+                        >
+                          {typed || part}
+                        </Box>
+                      )
+                    })}
+                </Typography>
+              </Box>
+            ) : null}
 
             {/* A blank variable is not a cosmetic problem: the dispatcher
                 refuses to send a campaign whose template has one, because the

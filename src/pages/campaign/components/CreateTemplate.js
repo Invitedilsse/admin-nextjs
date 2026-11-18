@@ -13,7 +13,8 @@ import {
   MenuItem,
   Grid2,
   Card,
-  CardContent
+  CardContent,
+  Alert
 } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import Icon from 'src/@core/components/icon'
@@ -56,6 +57,19 @@ const CreateTemplateCampaign = ({ open, toggle, id, RowData, fetchTable, functio
   const [hasMore, setHasMore] = useState(true)
   const [loading, setLoading] = useState(false)
   const [templateDetails, setTemplatesDetails] = useState({})
+
+  // ! THE CHOSEN OPTION, KEPT WHOLE.
+  //   The field used to rebuild its own value as
+  //   `{ label: templateDetails?.template_name, value: formData.template_name }`,
+  //   so the moment the details call answered in a shape that left
+  //   templateDetails empty, the box went BLANK while still holding a
+  //   selection - a clear X over nothing. The label belongs to the option
+  //   that was picked, not to a later request that may or may not land.
+  const [selectedTemplate, setSelectedTemplate] = useState(null)
+
+  // Whether the details call came back with the template's components.
+  // Without them there is no body text to preview - see the note below.
+  const [detailsThin, setDetailsThin] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [imageFile, setImageFile] = useState(null)
   const [templateHeaderImgComp, setTemplateHeaderImgComp] = useState(null)
@@ -126,26 +140,52 @@ const CreateTemplateCampaign = ({ open, toggle, id, RowData, fetchTable, functio
     }
   }
 
+  /**
+   * ! THE TEMPLATE SITS AT A DIFFERENT DEPTH IN EACH ANSWER.
+   *   /chatwise/template/:uid tries ChatWise's get-template-details and,
+   *   when that is unavailable, falls back to finding the row in the
+   *   template list - and the two do not nest the same way. The old code
+   *   read components from `data.__data.template.components` (deep) but
+   *   name, language and category from `data` itself (shallow), so on the
+   *   fallback every one of those three was undefined and the card showed
+   *   "Name:" with nothing after it.
+   *
+   *   Resolving the template ONCE, here, is what keeps the card, the
+   *   preview and the submitted payload reading the same object.
+   */
   const filtertemplateDetails = async id => {
-    // const details = templates.find(item=>item._uid === id)
-    const response = await apiGet(chatwiseTemplateUrl(id))
-    console.log(
-      'details of selecte temp----->',
-      response.data?.data,
-      response?.data?.data?.__data?.template?.components?.filter(item => item.type === 'BODY')[0]?.example?.body_text
-        ?.length
-    )
-    setTemplatesDetails(response?.data?.data)
-    setTemplateHeaderImgComp(
-      response?.data?.data?.__data?.template?.components?.find(
-        item => item.type === 'HEADER' && item.format === 'IMAGE'
-      ) || null
-    )
-    setTemplateBodyComp(response?.data?.data?.__data?.template?.components?.find(item => item.type === 'BODY') || null)
-    setTemplateBodyInpCount(
-      response?.data?.data?.__data?.template?.components?.filter(item => item.type === 'BODY')[0]?.example
-        ?.body_text?.[0]?.length || 0
-    )
+    try {
+      const response = await apiGet(chatwiseTemplateUrl(id))
+      const payload = response?.data?.data
+
+      const tpl = payload?.__data?.template || payload?.template || payload || {}
+      const components = tpl?.components || []
+
+      setTemplatesDetails(tpl)
+
+      setTemplateHeaderImgComp(
+        components.find(item => item.type === 'HEADER' && item.format === 'IMAGE') || null
+      )
+
+      const body = components.find(item => item.type === 'BODY') || null
+      setTemplateBodyComp(body)
+      setTemplateBodyInpCount(body?.example?.body_text?.[0]?.length || 0)
+
+      // ! A TEMPLATE WITH NO COMPONENTS IS NOT AN EMPTY TEMPLATE.
+      //   It is a template whose body never arrived: the list rows the
+      //   fallback matches against carry a name, a language and a category
+      //   and nothing else. Saying so beats a preview panel that is simply
+      //   blank, which reads as "this template has no message".
+      setDetailsThin(components.length === 0)
+    } catch (err) {
+      console.error('template details failed', err)
+      setTemplatesDetails({})
+      setTemplateHeaderImgComp(null)
+      setTemplateBodyComp(null)
+      setTemplateBodyInpCount(0)
+      setDetailsThin(true)
+      toast.error('Could not load that template from ChatWise')
+    }
   }
 
   const handleFileUpload = async (event, type, index) => {
@@ -236,8 +276,9 @@ const CreateTemplateCampaign = ({ open, toggle, id, RowData, fetchTable, functio
     try{
      const data = 
       {
-          "template_name": templateDetails.template_name,
-          "template_language": templateDetails?.language,
+          "template_name": templateDetails?.template_name || selectedTemplate?.label || '',
+          "template_language":
+            templateDetails?.language || selectedTemplate?.raw?.language || '',
           "title":formData.campaign_title,
            "header_image": imageFile,
           //need to chnages contacr group from array to
@@ -419,17 +460,16 @@ const CreateTemplateCampaign = ({ open, toggle, id, RowData, fetchTable, functio
   </FormControl> */}
 
         <AsyncPaginate
-          value={
-            formData.template_name
-              ? {
-                  label: templateDetails?.template_name,
-                  value: formData.template_name
-                }
-              : null
-          }
+          value={selectedTemplate}
           loadOptions={loadTemplateOptions}
           onChange={selected => {
+            setSelectedTemplate(selected || null)
             handleChange('template_name', selected?.value || '')
+
+            setTemplatesDetails({})
+            setTemplateHeaderImgComp(null)
+            setTemplateBodyComp(null)
+            setDetailsThin(false)
 
             if (selected?.value) {
               filtertemplateDetails(selected.value)
@@ -462,9 +502,26 @@ const CreateTemplateCampaign = ({ open, toggle, id, RowData, fetchTable, functio
               >
                 <Typography fontWeight={600}>Template Details</Typography>
 
-                <Typography>Name: {templateDetails?.template_name}</Typography>
-                <Typography>Language: {templateDetails?.language}</Typography>
-                <Typography>Category: {templateDetails?.category}</Typography>
+                {/* The option's own label is the fallback: it is the name
+                    that was picked, so it is right even before - or
+                    without - the details call. */}
+                <Typography>
+                  Name: {templateDetails?.template_name || selectedTemplate?.label || ''}
+                </Typography>
+                <Typography>
+                  Language: {templateDetails?.language || selectedTemplate?.raw?.language || ''}
+                </Typography>
+                <Typography>
+                  Category: {templateDetails?.category || selectedTemplate?.raw?.category || ''}
+                </Typography>
+
+                {detailsThin && (
+                  <Alert severity='info' sx={{ mt: 2 }}>
+                    ChatWise returned this template&apos;s name and language but not its
+                    message body, so there is nothing to preview. The campaign can still
+                    be scheduled - WhatsApp uses the approved template either way.
+                  </Alert>
+                )}
 
                 {/* HEADER IMAGE */}
                 {templateHeaderImgComp && (

@@ -87,13 +87,30 @@ const SideBarFirms = props => {
           description: values.description
         }
         let mainLogo = null;
-        if (values.imagePreview !== null) {
+
+        // ! TRUTHY, NOT `!== null`.
+        //   The delete path sets imagePreview from URL.revokeObjectURL(),
+        //   which returns undefined - and `undefined !== null` is true, so
+        //   a deleted logo took the UPLOAD branch and posted a null
+        //   FormData.
+        if (values.imagePreview) {
           const imageRes = await apiPost(`${baseURL}user/upload-doc`, logoFormData, true)
           var temp = [imageRes?.data?.detail]
           mainLogo = temp
           params['image'] = mainLogo
         } else {
-          params['image'] = RowData?.image
+          // ! THE LOGO AS THE FORM STANDS NOW, NOT AS THE ROW ARRIVED.
+          //   This was `RowData?.image`, and RowData is the LIST's copy of
+          //   the firm - it still carries the original logo for as long as
+          //   the drawer is open. So deleting the logo and pressing Update
+          //   put it straight back: the delete cleared it on the server,
+          //   and this line wrote the old one over the top a moment later.
+          //
+          //   deleteImage resets uploadedFileData to a blank placeholder,
+          //   so filtering on url tells the two cases apart - unchanged
+          //   keeps the real entries, deleted sends [] and the API's
+          //   `image || []` clears the column.
+          params['image'] = (uploadedFileData || []).filter(f => f && f.url)
         }
         const result =
           id === ''
@@ -176,8 +193,16 @@ const SideBarFirms = props => {
     } else {
       if (type == 'logo') {
         setLogoFormData(null)
-        const ur = URL.revokeObjectURL(file)
-        formik.setFieldValue('imagePreview', ur)
+
+        // ! revokeObjectURL RETURNS undefined - IT IS NOT A VALUE.
+        //   Its return was being stored as the preview, leaving
+        //   imagePreview undefined rather than null, which sent the submit
+        //   handler down the upload branch. Revoke for the side effect,
+        //   then clear the preview properly.
+        if (typeof formik.values.imagePreview === 'string') {
+          URL.revokeObjectURL(formik.values.imagePreview)
+        }
+        formik.setFieldValue('imagePreview', null)
       } else {
         let res = await deleteFile({
           service_type: 'cover_image'

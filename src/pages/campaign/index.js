@@ -14,7 +14,7 @@ import {
   DialogActions
 } from '@mui/material'
 import Grid2 from '@mui/material/Grid2'
-import { DeleteOutline, Edit, Send } from '@mui/icons-material'
+import { DeleteOutline, Edit, Send, Insights, Close } from '@mui/icons-material'
 import { MaterialReactTable, useMaterialReactTable } from 'material-react-table'
 
 // api hook
@@ -33,6 +33,20 @@ import { useSelector } from 'react-redux'
 import { set } from 'nprogress'
 import { LoadingButton } from '@mui/lab'
 import CreateTemplateCampaign from './components/CreateTemplate'
+import CampaignDelivery from './components/CampaignDelivery'
+
+/**
+ * The campaign's id on the panel.
+ *
+ * ! RESOLVED, NOT ASSUMED.
+ *   ChatWise is not consistent about this key across its endpoints - the
+ *   template list answers `_uid`, and `templateDetails` in the backend
+ *   already has to accept `_id` as well. A list row that turns out to carry
+ *   none of these leaves the button disabled with a reason, rather than
+ *   opening a dashboard that asks the panel about `undefined`.
+ */
+const campaignUid = row =>
+  row?._uid || row?.uid || row?.campaign_uid || row?.campaignUid || row?._id || row?.id || ''
 // import CreateCustomMessageDrawerAdmin from './AddTemplateDrawer.js'
 
 function CampaignTemplateList({ RowData }) {
@@ -43,12 +57,15 @@ function CampaignTemplateList({ RowData }) {
   const [contactsFunctionAll, setContactsFunctionAll] = useState([])
   const contactsFunctionCount = contactsFunctionAll.length
   const [dopen, setdOpen] = useState(false)
+
+  // The campaign whose delivery dashboard is open, by uid. '' when none is.
+  const [deliveryUid, setDeliveryUid] = useState('')
   const [delId, setdelId] = useState('')
   const [delLoading, setDelLoading] = useState(false)
 
 
 
-  const generateColumns = ({ onToggleTime, onTemplateClick, onDeleteData }) => [
+  const generateColumns = ({ onToggleTime, onTemplateClick, onDeleteData, onView }) => [
       {
       accessorKey: 'title',
       header: 'Title',
@@ -67,7 +84,44 @@ function CampaignTemplateList({ RowData }) {
      {
       accessorKey: 'status',
       header: 'Status',
-      Cell: ({ row }) => row.original.status === '1' ? 'Executed' : 'unknown' // Event/Trans/Acc/Other title
+
+      /* ! THE PANEL'S OWN WORD, NOT A GUESS AT IT.
+           This read `status === '1' ? 'Executed' : 'unknown'`, and every row
+           on the screen said "unknown" - because ChatWise does not answer
+           that field as the string "1". Printing what it actually sends is
+           both honest and the fastest way to find out what the values are.
+           The real delivery picture is a click away in the column beside
+           this one, and it comes from counts rather than from one word. */
+      Cell: ({ row }) => {
+        const value = row.original.status
+
+        return value === null || value === undefined || value === '' ? '—' : String(value)
+      }
+    },
+    {
+      accessorKey: 'delivery',
+      header: 'Delivery',
+      enableSorting: false,
+
+      /* The dashboard was already built for the invite campaigns; this is the
+         same component, opened by uid. Read, delivered, failed, the reason
+         WhatsApp gave per guest, and a CSV of the failures. */
+      Cell: ({ row }) => {
+        const uid = campaignUid(row.original)
+
+        return (
+          <Button
+            size='small'
+            variant='outlined'
+            startIcon={<Insights fontSize='small' />}
+            disabled={!uid}
+            title={uid ? 'Open the delivery dashboard' : 'This row carries no campaign id'}
+            onClick={() => onView(uid)}
+          >
+            View
+          </Button>
+        )
+      }
     },
     // {
     //   accessorKey: 'Action',
@@ -142,7 +196,8 @@ function CampaignTemplateList({ RowData }) {
       onToggleTime: handleToggleTime,
       // onManualClick: handleManualClick,
       onTemplateClick: handleTemplateClick,
-      onDeleteData: toggleDialog
+      onDeleteData: toggleDialog,
+      onView: setDeliveryUid
     }),
     data: contactsFunctionAll,
     enableRowSelection: false,
@@ -236,6 +291,27 @@ function CampaignTemplateList({ RowData }) {
         // functionId={RowData.id}
         // page={page}
       />)}
+      {/* One campaign's delivery. Mounted only while it is open, so closing it
+          stops the 30-second poll the dashboard runs while a campaign is
+          still moving. */}
+      <Dialog
+        open={Boolean(deliveryUid)}
+        onClose={() => setDeliveryUid('')}
+        fullWidth
+        maxWidth='lg'
+        scroll='paper'
+      >
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box sx={{ flex: 1 }}>Campaign delivery</Box>
+          <Button size='small' startIcon={<Close />} onClick={() => setDeliveryUid('')}>
+            Close
+          </Button>
+        </DialogTitle>
+        <DialogContent dividers>
+          {deliveryUid ? <CampaignDelivery uid={deliveryUid} /> : null}
+        </DialogContent>
+      </Dialog>
+
       <Dialog
         open={dopen}
         onClose={handleClose}
