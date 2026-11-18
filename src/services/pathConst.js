@@ -32,6 +32,25 @@ export const reportUserContacts = `${baseURL}function-reports/user-contacts`
 export const reportUserContactInvites = `${baseURL}function-reports/user-contact-invites`
 
 // Family Reminders (super-admin reporting)
+// ─── mini function management ─────────────────────────────────────────
+//
+// These sit under the app's own module (api/miniFunction), not under an
+// admin router, so the prefix is mini-function and the admin check happens
+// inside the controller.
+export const miniFunctionAdminListUrl = `${baseURL}mini-function/admin/functions`
+export const miniFunctionAdminDetailUrl = `${baseURL}mini-function/admin/function`
+export const miniFunctionMatchesUrl = `${baseURL}mini-function/admin/matches`
+export const miniFunctionOccasionsUrl = `${baseURL}mini-function/admin/occasions`
+export const miniFunctionOccasionUrl = `${baseURL}mini-function/admin/occasion`
+export const miniFunctionEventNamesUrl = `${baseURL}mini-function/admin/event-names`
+export const miniFunctionEventNameUrl = `${baseURL}mini-function/admin/event-name`
+export const miniFunctionSettingsUrl = `${baseURL}mini-function/admin/settings`
+export const miniFunctionSettingUrl = `${baseURL}mini-function/admin/setting`
+export const miniFunctionOverridesUrl = `${baseURL}mini-function/admin/overrides`
+export const miniFunctionOverrideUrl = `${baseURL}mini-function/admin/override`
+export const miniFunctionBlockedTermsUrl = `${baseURL}mini-function/admin/blocked-terms`
+export const miniFunctionBlockedTermUrl = `${baseURL}mini-function/admin/blocked-term`
+
 export const reminderSummaryUrl = `${baseURL}reminder-management/summary`
 export const reminderListUrl = `${baseURL}reminder-management/list`
 export const reminderDetailUrl = `${baseURL}reminder-management/details`

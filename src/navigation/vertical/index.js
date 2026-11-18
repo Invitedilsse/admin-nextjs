@@ -181,6 +181,13 @@ const navigation = () => {
           subject: 'remindermanage'
         },
         {
+          title: 'Mini Functions',
+          path: '/mini-function-management',
+          icon: 'tabler:confetti',
+          action: 'read',
+          subject: 'minifunction'
+        },
+        {
           title: 'Family Documents',
           path: '/family-documents',
           icon: 'tabler:file-text',
